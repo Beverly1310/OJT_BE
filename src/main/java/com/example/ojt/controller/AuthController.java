@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api.myservice.com/v1/auth")
@@ -41,11 +38,23 @@ public class AuthController {
     public ResponseEntity<?> doRegisterCompany(@Valid @RequestBody RegisterAccountCompanyRequest registerAccount) throws CustomException {
         boolean check = accountService.registerCompany(registerAccount);
         if (check) {
-            APIResponse response = new APIResponse(200, "Register successful");
+            APIResponse response = new APIResponse(200, "Register successful, please verify account");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         } else {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
+
+    @PutMapping("/company/verify")
+    public ResponseEntity<?> verifyCompanyOtp(@RequestParam String email, @RequestParam Integer otp) throws CustomException {
+        if (accountService.companyVerify(email,otp)){
+            APIResponse response = new APIResponse(200, "Verify successfully");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            throw new CustomException("Otp in valid", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 
 }

@@ -24,6 +24,7 @@ public class Account {
     private Company company;
     @OneToOne(mappedBy = "account")
     private Candidate candidate;
+    private Integer otp;
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

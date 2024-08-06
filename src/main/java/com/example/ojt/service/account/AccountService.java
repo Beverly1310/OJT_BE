@@ -5,11 +5,13 @@ import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.RegisterAccount;
 import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
 import com.example.ojt.model.dto.response.JWTResponse;
+import com.example.ojt.model.dto.response.MailBody;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
 import com.example.ojt.security.jwt.JWTProvider;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 
+import com.example.ojt.service.company.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Random;
 
 @Service
 @Transactional
@@ -41,7 +44,8 @@ public class AccountService implements IAccountService {
     private JWTProvider jwtProvider;
     @Autowired
     private IRoleRepository roleRepository;
-
+    @Autowired
+    private EmailService emailService;
     @Override
     public JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException {
         // Xac thuc email and password
@@ -84,6 +88,9 @@ public class AccountService implements IAccountService {
         return true;
     }
 
+
+
+
     @Override
     @Transactional
     public boolean registerCompany(RegisterAccountCompanyRequest registerAccount) throws CustomException {
@@ -98,10 +105,12 @@ public class AccountService implements IAccountService {
         }
         Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
                 .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+        Integer otp = otpGenerator();
         Account account = Account.builder()
                 .email(registerAccount.getEmailCompany())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
-                .status(1)
+                .otp(otp)
+                .status(0)
                 .role(role)
                 .build();
 
@@ -109,6 +118,8 @@ public class AccountService implements IAccountService {
                 .name(account.getName())
                 .createdAt(new Date())
                 .account(account)
+                .followers(0)
+                .size(0)
                 .emailCompany(account.getEmail())
                 .phone(registerAccount.getPhone())
                 .build();
@@ -123,10 +134,26 @@ public class AccountService implements IAccountService {
         companyRepository.save(company);
         accountRepository.save(account);
         addressCompanyRepository.save(addressCompany);
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
+        return true;
+    }
+
+    @Override
+    public boolean companyVerify(String email, Integer otp) throws CustomException {
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("account not found", HttpStatus.NOT_FOUND) );
+        if (otp.equals( account.getOtp())){
+            account.setStatus(1);
+            account.setOtp(null);
+        }else {
+            throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
+        }
         return true;
     }
 
 
-//    https://www.creativefabrica.com/wp-content/uploads/2022/08/03/Phoenix-Logo-of-Mythological-Bird-Graphics-35417559-1-1-580x387.jpg
-
+    //    https://www.creativefabrica.com/wp-content/uploads/2022/08/03/Phoenix-Logo-of-Mythological-Bird-Graphics-35417559-1-1-580x387.jpg
+private Integer otpGenerator() {
+    Random random = new Random();
+    return random.nextInt(100_000, 999_999);
+}
 }

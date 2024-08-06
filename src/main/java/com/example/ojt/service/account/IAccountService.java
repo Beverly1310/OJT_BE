@@ -11,4 +11,6 @@ public interface IAccountService {
 
     boolean register(RegisterAccount registerAccount) throws CustomException;
     boolean registerCompany(RegisterAccountCompanyRequest registerAccount) throws CustomException;
+
+    boolean companyVerify(String email , Integer otp) throws CustomException;
 }
