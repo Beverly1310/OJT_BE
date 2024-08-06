@@ -5,9 +5,11 @@ import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.RegisterAccount;
 import com.example.ojt.model.dto.response.JWTResponse;
 import com.example.ojt.model.entity.Account;
+import com.example.ojt.model.entity.Candidate;
 import com.example.ojt.model.entity.Role;
 import com.example.ojt.model.entity.RoleName;
 import com.example.ojt.repository.IAccountRepository;
+import com.example.ojt.repository.ICandidateRepository;
 import com.example.ojt.repository.IRoleRepository;
 import com.example.ojt.security.jwt.JWTProvider;
 import com.example.ojt.security.principle.AccountDetailsCustom;
@@ -19,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 public class AccountService implements IAccountService {
@@ -32,6 +36,8 @@ public class AccountService implements IAccountService {
     private JWTProvider jwtProvider;
     @Autowired
     private IRoleRepository roleRepository;
+    @Autowired
+    private ICandidateRepository candidateRepository;
     @Override
     public JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException {
         // Xac thuc email and password
@@ -55,7 +61,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public boolean register(RegisterAccount registerAccount) throws CustomException {
+    public boolean registerCandidate(RegisterAccount registerAccount) throws CustomException {
         if (accountRepository.existsByEmail(registerAccount.getEmail())) {
             throw new CustomException("Email existed!", HttpStatus.CONFLICT);
         }
@@ -65,12 +71,20 @@ public class AccountService implements IAccountService {
         Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
                 .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
         Account account = Account.builder()
+                .name(registerAccount.getName())
                 .email(registerAccount.getEmail())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
                 .status(1)
                 .role(role)
                 .build();
         accountRepository.save(account);
+        Candidate candidate = Candidate.builder()
+                .name(account.getName())
+                .account(account)
+                .status(1)
+                .createdAt(new Date())
+                .build();
+      candidateRepository.save(candidate);
         return true;
     }
 }

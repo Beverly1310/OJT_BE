@@ -25,10 +25,9 @@ public class AuthController {
         JWTResponse jwtResponse = accountService.login(loginAccountRequest);
         return ResponseEntity.ok(jwtResponse);
     }
-
-    @PostMapping("/sign-up")
+    @PostMapping("/candidate/sign-up")
     public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccount) throws CustomException {
-        boolean check = accountService.register(registerAccount);
+        boolean check = accountService.registerCandidate(registerAccount);
         if (check) {
             APIResponse response = new APIResponse(200, "Register successful");
             return new ResponseEntity<>(response, HttpStatus.CREATED);

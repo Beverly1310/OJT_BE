@@ -8,5 +8,5 @@ import com.example.ojt.model.dto.response.JWTResponse;
 public interface IAccountService {
     JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException;
 
-    boolean register(RegisterAccount registerAccount) throws CustomException;
+    boolean registerCandidate(RegisterAccount registerAccount) throws CustomException;
 }
