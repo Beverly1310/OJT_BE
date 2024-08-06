@@ -3,14 +3,13 @@ package com.example.ojt.service.account;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.RegisterAccount;
+import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
 import com.example.ojt.model.dto.response.JWTResponse;
-import com.example.ojt.model.entity.Account;
-import com.example.ojt.model.entity.Role;
-import com.example.ojt.model.entity.RoleName;
-import com.example.ojt.repository.IAccountRepository;
-import com.example.ojt.repository.IRoleRepository;
+import com.example.ojt.model.entity.*;
+import com.example.ojt.repository.*;
 import com.example.ojt.security.jwt.JWTProvider;
 import com.example.ojt.security.principle.AccountDetailsCustom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,19 +18,30 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 @Service
+@Transactional
 public class AccountService implements IAccountService {
     @Autowired
     private AuthenticationManager manager;
     @Autowired
     private IAccountRepository accountRepository;
     @Autowired
+    private IAddressCompanyRepository addressCompanyRepository;
+    @Autowired
+    private ILocationRepository locationRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ICompanyRepository companyRepository;
     @Autowired
     private JWTProvider jwtProvider;
     @Autowired
     private IRoleRepository roleRepository;
+
     @Override
     public JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException {
         // Xac thuc email and password
@@ -73,4 +83,50 @@ public class AccountService implements IAccountService {
         accountRepository.save(account);
         return true;
     }
+
+    @Override
+    @Transactional
+    public boolean registerCompany(RegisterAccountCompanyRequest registerAccount) throws CustomException {
+        if (accountRepository.existsByEmail(registerAccount.getEmailCompany())) {
+            throw new CustomException("Email existed!", HttpStatus.CONFLICT);
+        }
+        if (companyRepository.existsByPhone(registerAccount.getPhone())){
+            throw new CustomException("Phone existed!", HttpStatus.CONFLICT);
+        }
+        if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
+            throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
+        }
+        Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
+                .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+        Account account = Account.builder()
+                .email(registerAccount.getEmailCompany())
+                .password(passwordEncoder.encode(registerAccount.getPassword()))
+                .status(1)
+                .role(role)
+                .build();
+
+        Company company = Company.builder()
+                .name(account.getName())
+                .createdAt(new Date())
+                .account(account)
+                .emailCompany(account.getEmail())
+                .phone(registerAccount.getPhone())
+                .build();
+
+
+        AddressCompany addressCompany = AddressCompany.builder()
+                .company(company)
+                .location(locationRepository.findById(registerAccount.getLocationId()).orElseThrow(()-> new CustomException("City not found", HttpStatus.NOT_FOUND)))
+                .createdAt(new Date())
+                .status(1)
+                .build();
+        companyRepository.save(company);
+        accountRepository.save(account);
+        addressCompanyRepository.save(addressCompany);
+        return true;
+    }
+
+
+//    https://www.creativefabrica.com/wp-content/uploads/2022/08/03/Phoenix-Logo-of-Mythological-Bird-Graphics-35417559-1-1-580x387.jpg
+
 }

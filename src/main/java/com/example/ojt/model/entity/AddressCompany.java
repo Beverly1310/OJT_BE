@@ -18,8 +18,8 @@ public class AddressCompany {
 
     private String address;
     private String mapUrl;
-    @Column(name = "created_at", columnDefinition = "VARCHAR(20)")
-    private String createdAt;
+    @Column(name = "created_at")
+    private Date createdAt;
     private int status;
 
     @ManyToOne

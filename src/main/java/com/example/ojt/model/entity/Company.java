@@ -22,9 +22,8 @@ public class Company {
     private String website;
     private String linkFacebook;
     private String linkLinkedin;
-    private String linkGithub;
-    private int followers;
-    private int size;
+    private Integer followers;
+    private Integer size;
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     private String phone;

@@ -3,6 +3,7 @@ package com.example.ojt.controller;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.RegisterAccount;
+import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JWTResponse;
 import com.example.ojt.service.account.IAccountService;
@@ -36,4 +37,15 @@ public class AuthController {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
+    @PostMapping("/company/sign-up")
+    public ResponseEntity<?> doRegisterCompany(@Valid @RequestBody RegisterAccountCompanyRequest registerAccount) throws CustomException {
+        boolean check = accountService.registerCompany(registerAccount);
+        if (check) {
+            APIResponse response = new APIResponse(200, "Register successful");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } else {
+            throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
 }
