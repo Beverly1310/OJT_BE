@@ -14,6 +14,7 @@ import lombok.Setter;
 @Setter
 public class RegisterAccount {
     @NotEmpty(message = "Please fill Name!")
+
     private String name;
     @Email(message = "Email should be valid")
     private String email;
@@ -23,5 +24,4 @@ public class RegisterAccount {
     @NotEmpty(message = "Please fill password!")
     @Size(min = 4, max = 12, message = "Password's length must be between 4 and 12")
     private String confirmPassword;
-    private String roleName;
 }
