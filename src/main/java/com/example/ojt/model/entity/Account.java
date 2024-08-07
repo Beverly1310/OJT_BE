@@ -16,6 +16,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String name;
     private String email;
     private String password;
     private String backupPassword;
@@ -24,6 +25,7 @@ public class Account {
     private Company company;
     @OneToOne(mappedBy = "account")
     private Candidate candidate;
+    private Integer otp;
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

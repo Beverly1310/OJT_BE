@@ -13,8 +13,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RegisterAccount {
-//    @NotEmpty(message = "Please fill userName!")
-//    private String username;
+    @NotEmpty(message = "Please fill Name!")
+    private String name;
     @Email(message = "Email should be valid")
     private String email;
     @NotEmpty(message = "Please fill password!")
