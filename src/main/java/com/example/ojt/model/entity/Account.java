@@ -18,6 +18,7 @@ public class Account {
     private Integer id;
     private String email;
     private String password;
+    private String backupPassword;
     private Integer status;
     @OneToOne(mappedBy = "account")
     private Company company;
