@@ -1,6 +1,5 @@
 package com.example.ojt.model.dto.request;
 
-import com.example.ojt.model.entity.Candidate;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
