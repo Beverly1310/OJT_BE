@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-public class CandidateResponseDTO {
+    public class CandidateResponseDTO {
     private Integer id;
     private String name;
     private Date birthday;
