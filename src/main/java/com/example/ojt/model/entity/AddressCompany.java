@@ -1,5 +1,7 @@
 package com.example.ojt.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +26,7 @@ public class AddressCompany {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
+//    @JsonBackReference
     private Company company;
 
     @ManyToOne

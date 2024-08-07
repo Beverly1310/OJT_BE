@@ -114,8 +114,11 @@ public class AccountService implements IAccountService {
                 .role(role)
                 .build();
 
+        // Save account to get the ID
+        accountRepository.save(account);
+
         Company company = Company.builder()
-                .name(account.getName())
+                .name(registerAccount.getName())  // Lấy tên từ yêu cầu đăng ký
                 .createdAt(new Date())
                 .account(account)
                 .followers(0)
@@ -124,16 +127,16 @@ public class AccountService implements IAccountService {
                 .phone(registerAccount.getPhone())
                 .build();
 
-
         AddressCompany addressCompany = AddressCompany.builder()
                 .company(company)
                 .location(locationRepository.findById(registerAccount.getLocationId()).orElseThrow(()-> new CustomException("City not found", HttpStatus.NOT_FOUND)))
                 .createdAt(new Date())
                 .status(1)
                 .build();
+
         companyRepository.save(company);
-        accountRepository.save(account);
         addressCompanyRepository.save(addressCompany);
+
         emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
         return true;
     }

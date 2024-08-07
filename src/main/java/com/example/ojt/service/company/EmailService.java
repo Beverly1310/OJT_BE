@@ -18,7 +18,7 @@ public class EmailService {
         // Thiết lập địa chỉ người nhận từ mailBody
         message.setTo(mailBody.to());
         // Thiết lập địa chỉ người gửi (có thể thay đổi nếu cần)
-        message.setFrom("giangpc7@gmail.com");
+//        message.setFrom("giangpc7@gmail.com");
         // Thiết lập tiêu đề email từ mailBody
         message.setSubject(mailBody.subject());
         // Thiết lập nội dung email từ mailBody

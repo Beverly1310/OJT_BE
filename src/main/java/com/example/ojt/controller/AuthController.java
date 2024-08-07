@@ -34,6 +34,7 @@ public class AuthController {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
+
     @PostMapping("/company/sign-up")
     public ResponseEntity<?> doRegisterCompany(@Valid @RequestBody RegisterAccountCompanyRequest registerAccount) throws CustomException {
         boolean check = accountService.registerCompany(registerAccount);

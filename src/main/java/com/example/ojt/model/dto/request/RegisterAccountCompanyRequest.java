@@ -1,16 +1,13 @@
 package com.example.ojt.model.dto.request;
 
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-
+@Builder
 public class RegisterAccountCompanyRequest {
 
     @NotEmpty(message = "Please fill password!")
