@@ -30,7 +30,7 @@ public class CandidateRequestDTO {
     private String phone;
 
     @NotEmpty(message = "Please fill Gender!")
-    private String gender;
+    private boolean gender;
 
     @NotEmpty(message = "Please fill LinkLinkedin!")
     private String linkLinkedin;

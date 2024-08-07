@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ICandidateRepository extends JpaRepository<Candidate,Integer> {
-
+   Candidate findCandidateByAccountId(int accountId);
 }

@@ -1,13 +1,14 @@
 package com.example.ojt.service.account;
 
 import com.example.ojt.exception.CustomException;
-import com.example.ojt.model.dto.request.ChangePasswordRequest;
-import com.example.ojt.model.dto.request.LoginAccountRequest;
-import com.example.ojt.model.dto.request.PasswordChangeRequest;
-import com.example.ojt.model.dto.request.PasswordRequestThroughEmail;
-import com.example.ojt.model.dto.request.RegisterAccount;
-import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
+import com.example.ojt.model.dto.request.*;
 import com.example.ojt.model.dto.response.JWTResponse;
+import com.example.ojt.model.entity.Account;
+import com.example.ojt.model.entity.Candidate;
+import com.example.ojt.model.entity.RoleName;
+import com.example.ojt.repository.IAccountRepository;
+import com.example.ojt.repository.ICandidateRepository;
+import com.example.ojt.repository.IRoleRepository;
 import com.example.ojt.model.dto.response.MailBody;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
@@ -20,6 +21,7 @@ import com.example.ojt.service.company.EmailService;
 import com.example.ojt.service.BackupPasswordGenerator;
 import com.example.ojt.service.EmailSenderService;
 
+import com.example.ojt.service.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +31,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.Objects;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -60,14 +67,17 @@ public class AccountService implements IAccountService {
 
     @Autowired
     private IRoleRepository roleRepository;
-
-
-
     @Autowired
+    private ICandidateRepository candidateRepository;
+    @Autowired
+    private UploadService uploadService;
 
+    public static AccountDetailsCustom getCurrentUser() {
+        return (AccountDetailsCustom) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+    @Autowired
     private EmailService emailService;
-
-   @Autowired
+    @Autowired
     private EmailSenderService emailSenderService;
     @Autowired
     private BackupPasswordGenerator passwordGenerator;
@@ -78,20 +88,20 @@ public class AccountService implements IAccountService {
                 .orElseThrow(() -> new CustomException("Account not found!", HttpStatus.NOT_FOUND));
 //        Kiểm tra role tài khoản
         boolean roleCheck;
-        switch (loginAccountRequest.getRole()){
+        switch (loginAccountRequest.getRole()) {
             case "candidate":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
                 break;
             case "admin":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
                 break;
             case "company":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
                 break;
             default:
-                throw new CustomException("Role not found!",HttpStatus.BAD_REQUEST);
+                throw new CustomException("Role not found!", HttpStatus.BAD_REQUEST);
         }
-        if (roleCheck){
+        if (roleCheck) {
             //  Đặt lại mật khẩu nếu dùng mật khẩu dự phòng
             if (account.getBackupPassword() != null && passwordEncoder.matches(loginAccountRequest.getPassword(), account.getBackupPassword())) {
                 account.setPassword(passwordEncoder.encode(loginAccountRequest.getPassword()));
@@ -126,29 +136,32 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public boolean register(RegisterAccount registerAccount) throws CustomException {
-        if (accountRepository.existsByEmail(registerAccount.getEmail())) {
+    @Transactional
+    public boolean registerCandidate(RegisterAccount registerAccountCandidate) throws CustomException {
+        if (accountRepository.existsByEmail(registerAccountCandidate.getEmail())) {
             throw new CustomException("Email existed!", HttpStatus.CONFLICT);
         }
-        if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
+        if (!registerAccountCandidate.getPassword().equals(registerAccountCandidate.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
-
-        Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
-                .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
-
         Account account = Account.builder()
-                .email(registerAccount.getEmail())
-                .password(passwordEncoder.encode(registerAccount.getPassword()))
+                .name(registerAccountCandidate.getName())
+                .email(registerAccountCandidate.getEmail())
+                .password(passwordEncoder.encode(registerAccountCandidate.getPassword()))
                 .status(1)
-                .role(role)
+                .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_CANDIDATE")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
                 .build();
-
+        Candidate candidate = Candidate.builder()
+                .name(account.getName())
+                .account(account)
+                .status(1)
+                .createdAt(new Date())
+                .avatar("https://png.pngtree.com/png-vector/20220608/ourmid/pngtree-man-avatar-isolated-on-white-background-png-image_4891418.png")
+                .build();
+        candidateRepository.save(candidate);
         accountRepository.save(account);
         return true;
     }
-
-
 
 
     @Override
@@ -202,23 +215,50 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public boolean companyVerify(String email, Integer otp) throws CustomException {
-        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("account not found", HttpStatus.NOT_FOUND) );
-        if (otp.equals( account.getOtp())){
-            account.setStatus(1);
-            account.setOtp(null);
-        }else {
-            throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
+    public boolean updateCandidate(UpdateAccountCandidate updateAccountCandidate) throws CustomException {
+        Candidate candidate = candidateRepository.findById(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
+//        Candidate candidate = candidateRepository.findById(1).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
+        if (updateAccountCandidate.getAboutMe() != null && !updateAccountCandidate.getAboutMe().isBlank()) {
+            candidate.setAboutme(updateAccountCandidate.getAboutMe());
         }
+        if (updateAccountCandidate.getAddress() != null && !updateAccountCandidate.getAddress().isBlank()) {
+            candidate.setAddress(updateAccountCandidate.getAddress());
+        }
+        if (updateAccountCandidate.getAvatar() != null && !updateAccountCandidate.getAvatar().isEmpty()) {
+            candidate.setAvatar(uploadService.uploadFileToServer(updateAccountCandidate.getAvatar()));
+        }
+        if (updateAccountCandidate.getBirthDay() != null) {
+            candidate.setBirthday(updateAccountCandidate.getBirthDay());
+        }
+        if (updateAccountCandidate.getGender() != null) {
+            candidate.setGender(updateAccountCandidate.getGender());
+        }
+        if (updateAccountCandidate.getLinkGit() != null && !updateAccountCandidate.getLinkGit().isBlank()) {
+            candidate.setLinkGit(updateAccountCandidate.getLinkGit());
+        }
+        if ((updateAccountCandidate.getLinkLinkedin() != null && !updateAccountCandidate.getLinkLinkedin().isBlank())) {
+            candidate.setLinkLinkedin(updateAccountCandidate.getLinkLinkedin());
+        }
+        if (updateAccountCandidate.getName() != null && !updateAccountCandidate.getName().isBlank()) {
+            candidate.setName(updateAccountCandidate.getName());
+        }
+        if (updateAccountCandidate.getPhone() != null && !updateAccountCandidate.getPhone().isBlank()) {
+            candidate.setPhone(updateAccountCandidate.getPhone());
+        }
+        if (updateAccountCandidate.getPosition() != null && !updateAccountCandidate.getPosition().isBlank()) {
+            candidate.setPosition(updateAccountCandidate.getPosition());
+        }
+        candidate.setUpdatedAt(new Date());
+        candidateRepository.save(candidate);
         return true;
     }
 
 
     //    https://www.creativefabrica.com/wp-content/uploads/2022/08/03/Phoenix-Logo-of-Mythological-Bird-Graphics-35417559-1-1-580x387.jpg
-private Integer otpGenerator() {
-    Random random = new Random();
-    return random.nextInt(100_000, 999_999);
-}
+    private Integer otpGenerator() {
+        Random random = new Random();
+        return random.nextInt(100_000, 999_999);
+    }
 
     @Override
     public JWTResponse loginadmin(LoginAccountRequest loginAccountRequest) throws CustomException {
@@ -251,7 +291,6 @@ private Integer otpGenerator() {
                 .accessToken(accessToken)
                 .build();
     }
-
 
 
     @Override
@@ -294,48 +333,58 @@ private Integer otpGenerator() {
     }
 
 
-        public void requestPasswordThroughEmail (PasswordRequestThroughEmail request) throws CustomException {
-            Account account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("No account found with this email!", HttpStatus.NOT_FOUND));
-            boolean roleCheck;
-            switch (request.getRole()) {
-                case "candidate":
-                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
-                    break;
-                case "admin":
-                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
-                    break;
-                case "company":
-                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
-                    break;
-                default:
-                    throw new CustomException("Role not found!", HttpStatus.BAD_REQUEST);
-            }
-            if (roleCheck) {
-                String backupPassword = passwordGenerator.generate();
-                account.setBackupPassword((passwordEncoder.encode(backupPassword)));
-                accountRepository.save(account);
-                String message = "Your recovery password is " + backupPassword + ". Do not share this message!";
-                emailSenderService.sendEmail(request.getEmail(), "Password recovery", message);
-            } else {
-                throw new CustomException("No account found with this role!", HttpStatus.BAD_REQUEST);
-            }
+    public void requestPasswordThroughEmail(PasswordRequestThroughEmail request) throws CustomException {
+        Account account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("No account found with this email!", HttpStatus.NOT_FOUND));
+        boolean roleCheck;
+        switch (request.getRole()) {
+            case "candidate":
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
+                break;
+            case "admin":
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
+                break;
+            case "company":
+                roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
+                break;
+            default:
+                throw new CustomException("Role not found!", HttpStatus.BAD_REQUEST);
         }
+        if (roleCheck) {
+            String backupPassword = passwordGenerator.generate();
+            account.setBackupPassword((passwordEncoder.encode(backupPassword)));
+            accountRepository.save(account);
+            String message = "Your recovery password is " + backupPassword + ". Do not share this message!";
+            emailSenderService.sendEmail(request.getEmail(), "Password recovery", message);
+        } else {
+            throw new CustomException("No account found with this role!", HttpStatus.BAD_REQUEST);
+        }
+    }
 
 
     @Override
     public void requestPasswordChange(PasswordChangeRequest request) throws CustomException {
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal()==null){
-            throw new CustomException("Token not found!",HttpStatus.BAD_REQUEST);
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) {
+            throw new CustomException("Token not found!", HttpStatus.BAD_REQUEST);
         }
         AccountDetailsCustom accountDetailsCustom = (AccountDetailsCustom) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Account currentUser = accountRepository.findById(accountDetailsCustom.getId()).orElseThrow(()->new CustomException("Invalid token!",HttpStatus.NOT_FOUND));
+        Account currentUser = accountRepository.findById(accountDetailsCustom.getId()).orElseThrow(() -> new CustomException("Invalid token!", HttpStatus.NOT_FOUND));
         String currentPassword = currentUser.getPassword();
-        if (!passwordEncoder.matches(request.getCurrentPassword(),currentPassword)) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), currentPassword)) {
             throw new CustomException("Incorrect current password!", HttpStatus.BAD_REQUEST);
         } else {
             currentUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
             accountRepository.save(currentUser);
         }
     }
-
+    @Override
+    public boolean companyVerify(String email, Integer otp) throws CustomException {
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("account not found", HttpStatus.NOT_FOUND) );
+        if (otp.equals( account.getOtp())){
+            account.setStatus(1);
+            account.setOtp(null);
+        }else {
+            throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
+        }
+        return true;
+    }
 }

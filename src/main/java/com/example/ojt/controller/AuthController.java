@@ -1,12 +1,8 @@
 package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
-import com.example.ojt.model.dto.request.ChangePasswordRequest;
-import com.example.ojt.model.dto.request.LoginAccountRequest;
-import com.example.ojt.model.dto.request.PasswordChangeRequest;
-import com.example.ojt.model.dto.request.PasswordRequestThroughEmail;
-import com.example.ojt.model.dto.request.RegisterAccount;
-import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
+import com.example.ojt.model.dto.request.*;
+
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JWTResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
@@ -28,21 +24,17 @@ public class AuthController {
     private GlobalExceptionHandler globalExceptionHandler;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginAccountRequest loginAccountRequest) {
-        try {
-            JWTResponse response = accountService.login(loginAccountRequest);
-            return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Login successful", response));
-        } catch (CustomException ex) {
-            return globalExceptionHandler.handleCustomException(ex);
-        }
+    public ResponseEntity<JWTResponse> doLogin(@Valid @RequestBody LoginAccountRequest loginAccountRequest) throws Exception {
+        JWTResponse jwtResponse = accountService.login(loginAccountRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccount) throws CustomException {
-        boolean check = accountService.register(registerAccount);
+    @PostMapping("/candidate/sign-up")
+    public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccountCandidate) throws CustomException {
+        boolean check = accountService.registerCandidate(registerAccountCandidate);
         if (check) {
             APIResponse response = new APIResponse(200, "Register successful");
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -135,8 +127,6 @@ public class AuthController {
             throw new CustomException("Password change failed", HttpStatus.BAD_REQUEST);
         }
     }
-
-
 
 
     @PostMapping("/changePassword")
