@@ -12,8 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class RegisterAccountCandidate {
-    @NotEmpty(message = "Please fill name!")
+public class RegisterAccount {
+    @NotEmpty(message = "Please fill Name!")
+
     private String name;
     @Email(message = "Email should be valid")
     private String email;
