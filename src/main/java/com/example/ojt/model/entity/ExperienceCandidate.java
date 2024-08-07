@@ -18,9 +18,9 @@ public class ExperienceCandidate {
     private String company;
     private String position;
     @Column(name = "start_at", columnDefinition = "VARCHAR(20)")
-    private String startAt;
+    private Date startAt;
     @Column(name = "end_at", columnDefinition = "VARCHAR(20)")
-    private String endAt;
+    private Date endAt;
     private String info;
     private int status;
 
