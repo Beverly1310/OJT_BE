@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class RegisterAccount {
+public class RegisterAccountCandidate {
     @NotEmpty(message = "Please fill name!")
     private String name;
     @Email(message = "Email should be valid")
@@ -23,5 +23,4 @@ public class RegisterAccount {
     @NotEmpty(message = "Please fill password!")
     @Size(min = 4, max = 12, message = "Password's length must be between 4 and 12")
     private String confirmPassword;
-    private String roleName;
 }

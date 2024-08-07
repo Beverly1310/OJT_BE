@@ -2,7 +2,7 @@ package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.LoginAccountRequest;
-import com.example.ojt.model.dto.request.RegisterAccount;
+import com.example.ojt.model.dto.request.RegisterAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JWTResponse;
 import com.example.ojt.service.account.IAccountService;
@@ -26,11 +26,11 @@ public class AuthController {
         return ResponseEntity.ok(jwtResponse);
     }
     @PostMapping("/candidate/sign-up")
-    public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccount) throws CustomException {
-        boolean check = accountService.registerCandidate(registerAccount);
+    public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccountCandidate registerAccountCandidate) throws CustomException {
+        boolean check = accountService.registerCandidate(registerAccountCandidate);
         if (check) {
             APIResponse response = new APIResponse(200, "Register successful");
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
         }

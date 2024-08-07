@@ -16,17 +16,17 @@ import java.util.Date;
 public class CandidateResponseDTO {
     private Integer id;
     private String name;
-    private String birthday;
+    private Date birthday;
     private String address;
     private String phone;
-    private String gender;
+    private Boolean gender;
     private String linkLinkedin;
     private String linkGit;
     private String position;
     private String avatar;
     private String aboutme;
     private Integer status;
-    private Date createAt = new Date();
+    private Date createAt ;
     private String account;
     public CandidateResponseDTO (Candidate candidate) {
         this.id = candidate.getId();
