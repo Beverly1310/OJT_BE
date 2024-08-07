@@ -1,6 +1,7 @@
 package com.example.ojt.service.account;
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.ChangePasswordRequest;
 import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.PasswordChangeRequest;
 import com.example.ojt.model.dto.request.PasswordRequestThroughEmail;
@@ -33,25 +34,35 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.Random;
 
+import java.util.Objects;
+
 @Service
 @Transactional
 public class AccountService implements IAccountService {
+
     @Autowired
     private AuthenticationManager manager;
+
     @Autowired
     private IAccountRepository accountRepository;
+
     @Autowired
     private IAddressCompanyRepository addressCompanyRepository;
     @Autowired
     private ILocationRepository locationRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private ICompanyRepository companyRepository;
     @Autowired
     private JWTProvider jwtProvider;
+
     @Autowired
     private IRoleRepository roleRepository;
+
+
+
     @Autowired
 
     private EmailService emailService;
@@ -122,14 +133,17 @@ public class AccountService implements IAccountService {
         if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
+
         Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
                 .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+
         Account account = Account.builder()
                 .email(registerAccount.getEmail())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
                 .status(1)
                 .role(role)
                 .build();
+
         accountRepository.save(account);
         return true;
     }
@@ -207,32 +221,106 @@ private Integer otpGenerator() {
 }
 
     @Override
-    public void requestPasswordThroughEmail(PasswordRequestThroughEmail request) throws CustomException {
-        Account account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("No account found with this email!", HttpStatus.NOT_FOUND));
-        boolean roleCheck;
-        switch (request.getRole()){
-            case "candidate":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
-                break;
-            case "admin":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
-                break;
-            case "company":
-                roleCheck=account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
-                break;
-            default:
-                throw new CustomException("Role not found!",HttpStatus.BAD_REQUEST);
+    public JWTResponse loginadmin(LoginAccountRequest loginAccountRequest) throws CustomException {
+        // Authenticate email and password
+        Authentication authentication = null; //  lưu trữ thông tin chi tiết của người dùng đã được xác thực. đại diện cho người dùng hiện đang đăng nhập.
+        try {
+            authentication = manager.authenticate(new UsernamePasswordAuthenticationToken(loginAccountRequest.getEmail(), loginAccountRequest.getPassword()));
+            //sử dụng phương thức manager.authenticate() để xác thực người dùng dựa trên email và mật khẩu được cung cấp
+            // tạo ra một đối tượng mới UsernamePasswordAuthenticationToken, đại diện cho thông tin xác thực (email và mật khẩu) của người dùng cần được xác thực.
+        } catch (AuthenticationException e) {
+            throw new CustomException("Email or password incorrect", HttpStatus.NOT_FOUND);
         }
-        if (roleCheck){
-            String backupPassword = passwordGenerator.generate();
-            account.setBackupPassword((passwordEncoder.encode(backupPassword)));
-            accountRepository.save(account);
-            String message = "Your recovery password is " + backupPassword + ". Do not share this message!";
-            emailSenderService.sendEmail(request.getEmail(), "Password recovery", message);
-        } else {
-            throw new CustomException("No account found with this role!",HttpStatus.BAD_REQUEST);
+
+        AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();   //  // Principal : đại diện cho người dùng đã đăng nhập.
+        if (detailsCustom.getStatus() == 2) {
+            throw new CustomException("Account has been blocked!", HttpStatus.FORBIDDEN);
         }
+
+        String accessToken = jwtProvider.generateAccessToken(detailsCustom); // tạo 1 token cho ng dùng đã xác thực.chứa tt cơ bản về ng dùng
+
+        if (!Objects.equals(detailsCustom.getRoleName(), RoleName.ROLE_ADMIN.name())) {
+            throw new CustomException("You are not an Admin!", HttpStatus.FORBIDDEN);
+        }
+
+
+        return JWTResponse.builder()
+                .email(detailsCustom.getEmail())
+                .roleName(detailsCustom.getRoleName())
+                .status(detailsCustom.getStatus())
+                .accessToken(accessToken)
+                .build();
     }
+
+
+
+    @Override
+    public boolean registerAdmin(RegisterAccount registerAccount) throws CustomException {
+        if (accountRepository.existsByEmail(registerAccount.getEmail())) {
+            throw new CustomException("Email existed!", HttpStatus.CONFLICT);
+        }
+        if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
+            throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
+        }
+        Account account = Account.builder()
+                .email(registerAccount.getEmail())
+                .password(passwordEncoder.encode(registerAccount.getPassword()))
+                .status(1)
+                .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_ADMIN")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
+                .build();
+
+        accountRepository.save(account);
+
+        return true;
+    }
+
+    @Override
+    public boolean changeAdminPassword(ChangePasswordRequest changePasswordRequest) throws CustomException {
+        Account account = accountRepository.findByEmail(changePasswordRequest.getEmail())
+                .orElseThrow(() -> new CustomException("Email not found", HttpStatus.NOT_FOUND));
+
+        if (!Objects.equals(account.getRole().getRoleName(), RoleName.ROLE_ADMIN)) {
+            throw new CustomException("Only admin can change the password using this endpoint", HttpStatus.FORBIDDEN);
+        }
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), account.getPassword())) {
+            throw new CustomException("Old password is incorrect", HttpStatus.BAD_REQUEST);
+        }
+
+        account.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        accountRepository.save(account);
+
+        return true;
+    }
+
+
+        public void requestPasswordThroughEmail (PasswordRequestThroughEmail request) throws CustomException {
+            Account account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("No account found with this email!", HttpStatus.NOT_FOUND));
+            boolean roleCheck;
+            switch (request.getRole()) {
+                case "candidate":
+                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_CANDIDATE);
+                    break;
+                case "admin":
+                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_ADMIN);
+                    break;
+                case "company":
+                    roleCheck = account.getRole().getRoleName().equals(RoleName.ROLE_COMPANY);
+                    break;
+                default:
+                    throw new CustomException("Role not found!", HttpStatus.BAD_REQUEST);
+            }
+            if (roleCheck) {
+                String backupPassword = passwordGenerator.generate();
+                account.setBackupPassword((passwordEncoder.encode(backupPassword)));
+                accountRepository.save(account);
+                String message = "Your recovery password is " + backupPassword + ". Do not share this message!";
+                emailSenderService.sendEmail(request.getEmail(), "Password recovery", message);
+            } else {
+                throw new CustomException("No account found with this role!", HttpStatus.BAD_REQUEST);
+            }
+        }
+
 
     @Override
     public void requestPasswordChange(PasswordChangeRequest request) throws CustomException {
