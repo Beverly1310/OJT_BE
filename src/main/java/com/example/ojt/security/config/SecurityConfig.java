@@ -74,9 +74,9 @@ public class SecurityConfig {
 //                        auth.requestMatchers("/admin/**").hasRole("ADMIN"))
                                 auth.requestMatchers(
                                                 "/api.myservice.com/v1/admin/**").permitAll()
-                                        .requestMatchers("/api.myservice.com/v1/user/**").hasAuthority("ROLE_USER")
-                                        .requestMatchers("/api.myservice.com/v1/manager/**").hasAuthority("ROLE_MANAGER")
-                                        .requestMatchers("/api.myservice.com/v1/user-manager/**", "/user-client/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER")
+//                                        .requestMatchers("/api.myservice.com/v1/user/**").hasAuthority("ROLE_USER")
+//                                        .requestMatchers("/api.myservice.com/v1/manager/**").hasAuthority("ROLE_MANAGER")
+//                                        .requestMatchers("/api.myservice.com/v1/user-manager/**", "/user-client/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER")
                                         .anyRequest().permitAll() // tất cả quyền
                 )
                 .authenticationProvider(authenticationProvider())

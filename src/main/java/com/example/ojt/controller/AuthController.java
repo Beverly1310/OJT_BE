@@ -6,6 +6,7 @@ import com.example.ojt.model.dto.request.LoginAccountRequest;
 import com.example.ojt.model.dto.request.PasswordChangeRequest;
 import com.example.ojt.model.dto.request.PasswordRequestThroughEmail;
 import com.example.ojt.model.dto.request.RegisterAccount;
+import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JWTResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private IAccountService accountService;
-
 
 
     @Autowired
@@ -51,6 +51,7 @@ public class AuthController {
 
     /**
      * đăng nhập admin
+     *
      * @param loginAccountRequest
      * @return
      * @throws CustomException
@@ -64,6 +65,7 @@ public class AuthController {
 
     /**
      * đăng kí admin
+     *
      * @param registerAccount
      * @return
      * @throws CustomException
@@ -79,14 +81,52 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/company/sign-up")
+    public ResponseEntity<?> doRegisterCompany(@Valid @RequestBody RegisterAccountCompanyRequest registerAccount) throws
+            CustomException {
+        boolean check = accountService.registerCompany(registerAccount);
+        if (check) {
+            APIResponse response = new APIResponse(200, "Register successful, please verify account");
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } else {
+            throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+
+    @PutMapping("/company/verify")
+    public ResponseEntity<?> verifyCompanyOtp(@RequestParam String email, @RequestParam Integer otp) throws
+            CustomException {
+        if (accountService.companyVerify(email, otp)) {
+            APIResponse response = new APIResponse(200, "Verify successfully");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            throw new CustomException("Otp in valid", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @PostMapping("/recoverPassword")
+    public ResponseEntity<?> getPasswordFromEmail(@Valid @RequestBody PasswordRequestThroughEmail request) throws
+            CustomException {
+        try {
+            accountService.requestPasswordThroughEmail(request);
+            return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "An email containing password has been sent to " + request.getEmail() + "! Please check your email!", ""));
+        } catch (CustomException e) {
+            return globalExceptionHandler.handleCustomException(e);
+        }
+    }
+
     /**
      * thay đổi mật khẩu admin
+     *
      * @param changePasswordRequest
      * @return
      * @throws CustomException
      */
     @PostMapping("/admin/changepassword")
-    public ResponseEntity<?> changeAdminPassword(@RequestBody @Valid ChangePasswordRequest changePasswordRequest) throws CustomException {
+    public ResponseEntity<?> changeAdminPassword(@RequestBody @Valid ChangePasswordRequest changePasswordRequest) throws
+            CustomException {
         boolean check = accountService.changeAdminPassword(changePasswordRequest);
         if (check) {
             APIResponse response = new APIResponse(200, "Password changed successfully");
@@ -96,26 +136,20 @@ public class AuthController {
         }
     }
 
-            @PostMapping("/recoverPassword")
-            public ResponseEntity<?> getPasswordFromEmail (@Valid @RequestBody PasswordRequestThroughEmail request) throws
-            CustomException {
-                try {
-                    accountService.requestPasswordThroughEmail(request);
-                    return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "An email containing password has been sent to " + request.getEmail() + "! Please check your email!", ""));
-                } catch (CustomException e) {
-                    return globalExceptionHandler.handleCustomException(e);
-                }
-            }
 
-            @PostMapping("/changePassword")
-            public ResponseEntity<?> changePassword (@Valid @RequestBody PasswordChangeRequest request) throws
-            CustomException {
-                try {
-                    accountService.requestPasswordChange(request);
-                    return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Password changed successfully!", ""));
-                } catch (CustomException e) {
-                    return globalExceptionHandler.handleCustomException(e);
 
-                }
-            }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody PasswordChangeRequest request) throws
+            CustomException {
+        try {
+            accountService.requestPasswordChange(request);
+            return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Password changed successfully!", ""));
+        } catch (CustomException e) {
+            return globalExceptionHandler.handleCustomException(e);
+
         }
+    }
+}
+
+
