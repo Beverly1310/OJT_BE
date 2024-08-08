@@ -210,11 +210,11 @@ public class AccountService implements IAccountService {
                 .createdAt(new Date())
                 .status(1)
                 .build();
-
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
         companyRepository.save(company);
         addressCompanyRepository.save(addressCompany);
 
-        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
+
         return true;
     }
 

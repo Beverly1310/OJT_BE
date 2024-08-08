@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ICertificateRepository extends CrudRepository<CertificateCandidate, Integer> {
@@ -19,4 +20,6 @@ public interface ICertificateRepository extends CrudRepository<CertificateCandid
     Page<CertificateCandidate> findByCandidate(Candidate candidate, Pageable pageable);
 
     Optional<CertificateCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
+    List<CertificateCandidate> findAllByCandidateId(Integer id);
+
 }

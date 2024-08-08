@@ -26,10 +26,11 @@ public class AddressCompany {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
-//    @JsonBackReference
+
     private Company company;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
+
     private Location location;
 }
