@@ -1,18 +1,15 @@
 package com.example.ojt.controller;
 
-import com.example.ojt.advice.APIControllerAdvice;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
 import com.example.ojt.model.dto.request.UpdateAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.DataResponse;
 import com.example.ojt.model.entity.EducationCandidate;
-import com.example.ojt.service.CandidateService;
-import com.example.ojt.service.ICandidateService;
+import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.account.IAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
