@@ -15,20 +15,23 @@ public interface IAccountService {
     JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException;
 
     boolean registerCandidate(RegisterAccount registerAccount) throws CustomException;
+
     boolean updateCandidate(UpdateAccountCandidate updateAccountCandidate) throws CustomException;
 
 
-
     JWTResponse loginadmin(LoginAccountRequest loginAccountRequest) throws CustomException;
+
     boolean registerAdmin(RegisterAccount registerAccount) throws CustomException;
+
     boolean changeAdminPassword(ChangePasswordRequest changePasswordRequest) throws CustomException;
 
     boolean registerCompany(RegisterAccountCompanyRequest registerAccount) throws CustomException;
 
-    boolean companyVerify(String email , Integer otp) throws CustomException;
+    boolean accountVerify(String email, Integer otp) throws CustomException;
 
 
     void requestPasswordThroughEmail(PasswordRequestThroughEmail request) throws CustomException;
+
     void requestPasswordChange(PasswordChangeRequest request) throws CustomException;
 
 }

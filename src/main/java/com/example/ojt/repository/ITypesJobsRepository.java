@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ITypesJobsRepository extends JpaRepository<TypesJobs,Integer> {
-
     void deleteAllByJobId(Integer jobId);
 }

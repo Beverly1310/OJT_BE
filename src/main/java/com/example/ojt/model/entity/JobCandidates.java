@@ -17,7 +17,6 @@ public class JobCandidates {
 
     private int status;
     private String cvUrl;
-
     private String content;
 
     @ManyToOne

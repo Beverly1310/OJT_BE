@@ -22,5 +22,4 @@ public class EduCandidateAddReq {
     private Date endAt;
     @NotBlank(message = "Please fill information of education")
     private String info;
-    private Integer status;
 }

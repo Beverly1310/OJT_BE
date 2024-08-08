@@ -1,5 +1,6 @@
 package com.example.ojt.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,13 +18,13 @@ public class SkillsCandidate {
     private Integer id;
     @Column(name = "name", columnDefinition = "VARCHAR(55)")
     private String name;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "leveljob_id")
     private LevelJob levelJob;
 
-    private Integer status;
 }
