@@ -39,6 +39,7 @@ public class Company {
 
     @OneToOne
     @JoinColumn(name = "account_id")
+    @JsonIgnore
     private Account account;
 
     @OneToMany(mappedBy = "company")

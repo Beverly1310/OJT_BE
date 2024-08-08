@@ -3,7 +3,6 @@ package com.example.ojt.controller;
 import com.example.ojt.advice.APIControllerAdvice;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
-import com.example.ojt.model.dto.request.RegisterAccountCandidate;
 import com.example.ojt.model.dto.request.UpdateAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.DataResponse;
