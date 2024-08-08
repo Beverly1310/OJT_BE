@@ -1,21 +1,22 @@
 package com.example.ojt.model.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class UpdateEduCandidateReq {
+public class UpdateProjectReq {
     private Integer id;
-    private String nameEducation;
-    private String major;
+    private String name;
+    private String info;
+    private String link;
     private Date startAt;
     private Date endAt;
-    private String info;
 }

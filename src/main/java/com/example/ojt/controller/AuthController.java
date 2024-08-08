@@ -24,16 +24,17 @@ public class AuthController {
     private GlobalExceptionHandler globalExceptionHandler;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<JWTResponse> doLogin(@Valid @RequestBody LoginAccountRequest loginAccountRequest) throws Exception {
-        JWTResponse jwtResponse = accountService.login(loginAccountRequest);
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<?> doLogin(@Valid @RequestBody LoginAccountRequest loginAccountRequest) throws Exception {
+        JWTResponse response = accountService.login(loginAccountRequest);
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Login successful", response));
+
     }
 
     @PostMapping("/candidate/sign-up")
     public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccountCandidate) throws CustomException {
         boolean check = accountService.registerCandidate(registerAccountCandidate);
         if (check) {
-            APIResponse response = new APIResponse(200, "Register successful");
+            APIResponse response = new APIResponse(200, "Register successful, please verify your account!");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -86,10 +87,10 @@ public class AuthController {
     }
 
 
-    @PutMapping("/company/verify")
+    @PutMapping("/verify")
     public ResponseEntity<?> verifyCompanyOtp(@RequestParam String email, @RequestParam Integer otp) throws
             CustomException {
-        if (accountService.companyVerify(email, otp)) {
+        if (accountService.accountVerify(email, otp)) {
             APIResponse response = new APIResponse(200, "Verify successfully");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
