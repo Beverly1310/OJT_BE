@@ -54,7 +54,7 @@ public class TypeCompanyController {
     @PutMapping
     public ResponseEntity<?> updateTypeCompany( @RequestBody @Valid TypeCompanyRequest typeCompanyRequest) {
         try {
-            boolean isUpdated = typeCompanyService.updateTypeCompany(typeCompanyRequest, typeCompanyRequest.getId());
+            boolean isUpdated = typeCompanyService.updateTypeCompany(typeCompanyRequest);
             if (isUpdated) {
                 return ResponseEntity.ok().body("Update type company success");
             } else {

@@ -42,10 +42,10 @@ public class TypeJobService implements ITypeJobService {
         }
     }
 
-    @Override
-    public boolean updateTypeJob(TypeJobRequest typeJobRequest, Integer updateId) throws CustomException {
+     @Override
+    public boolean updateTypeJob(TypeJobRequest typeJobRequest) throws CustomException {
         try {
-            Optional<TypeJob> existingJob = typeJobRepository.findById(updateId);
+            Optional<TypeJob> existingJob = typeJobRepository.findById(typeJobRequest.getId());
             if (existingJob.isPresent()) {
                 TypeJob typeJob = existingJob.get();
                 typeJob.setName(typeJobRequest.getName());
@@ -58,6 +58,7 @@ public class TypeJobService implements ITypeJobService {
             throw new CustomException("Error updating TypeJob", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @Override
     public boolean deleteByIdTypeJob(Integer deleteId) throws CustomException {

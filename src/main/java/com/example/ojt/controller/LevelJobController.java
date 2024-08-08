@@ -47,7 +47,7 @@ public class LevelJobController {
     @PutMapping
     public ResponseEntity<?> updateLevelJob(@RequestBody @Valid LevelJobRequest levelJobRequest) {
         try {
-            boolean isUpdated = levelJobService.updateLevelJob(levelJobRequest, levelJobRequest.getId());
+            boolean isUpdated = levelJobService.updateLevelJob(levelJobRequest);
             if (isUpdated) {
                 return ResponseEntity.ok().body("Cập nhật Level Job thành công");
             } else {

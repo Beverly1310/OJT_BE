@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 public interface ILevelJobService {
     Page<LevelJob> findAll(Pageable pageable, String search);
     boolean addLevelJob(LevelJobRequest levelJobRequest) throws CustomException;
-    boolean updateLevelJob(LevelJobRequest levelJobRequest, Integer updateId) throws CustomException;
+    boolean updateLevelJob(LevelJobRequest levelJobRequest) throws CustomException;
     boolean deleteByIdLevelJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
 }

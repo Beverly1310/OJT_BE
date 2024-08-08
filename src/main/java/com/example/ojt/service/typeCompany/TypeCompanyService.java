@@ -42,7 +42,7 @@ public class TypeCompanyService implements ITypeCompanyService{
     }
 
     @Override
-    public boolean updateTypeCompany(TypeCompanyRequest typeCompanyRequest, Integer updateId) throws CustomException {
+    public boolean updateTypeCompany(TypeCompanyRequest typeCompanyRequest) throws CustomException {
         try {
             Optional<TypeCompany> existingCompany = typeCompanyRepository.findById(typeCompanyRequest.getId());
             if (existingCompany.isPresent()) {

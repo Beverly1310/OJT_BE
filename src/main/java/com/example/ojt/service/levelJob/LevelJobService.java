@@ -41,9 +41,9 @@ public class LevelJobService implements ILevelJobService{
     }
 
     @Override
-    public boolean updateLevelJob(LevelJobRequest levelJobRequest, Integer updateId) throws CustomException {
+    public boolean updateLevelJob(LevelJobRequest levelJobRequest) throws CustomException {
         try {
-            Optional<LevelJob> existingJob = levelJobRepository.findById(updateId);
+            Optional<LevelJob> existingJob = levelJobRepository.findById(levelJobRequest.getId());
             if (existingJob.isPresent()) {
                 LevelJob levelJob = existingJob.get();
                 levelJob.setName(levelJobRequest.getName());

@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 public interface ITypeCompanyService {
     Page<TypeCompany> findAll(Pageable pageable, String search);
     boolean addTypeCompany(TypeCompanyRequest typeCompanyRequest) throws CustomException;
-    boolean updateTypeCompany(TypeCompanyRequest typeCompanyRequest, Integer updateId) throws CustomException;
+    boolean updateTypeCompany(TypeCompanyRequest typeCompanyRequest) throws CustomException;
     boolean deleteByIdTypeCompany(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
 }

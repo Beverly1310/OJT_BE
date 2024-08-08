@@ -50,7 +50,7 @@ public class TypeJobController {
     @PutMapping
     public ResponseEntity<?> updateTypeJob(@RequestBody @Valid TypeJobRequest typeJobRequest) {
         try {
-            boolean isUpdated = typeJobService.updateTypeJob(typeJobRequest, typeJobRequest.getId());
+            boolean isUpdated = typeJobService.updateTypeJob(typeJobRequest);
             if (isUpdated) {
                 return ResponseEntity.ok().body("Cập nhật Type Job thành công");
             } else {

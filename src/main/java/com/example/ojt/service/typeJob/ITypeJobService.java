@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 public interface ITypeJobService {
     Page<TypeJob> findAll(Pageable pageable, String search);
     boolean addTypeJob(TypeJobRequest typeJobRequest) throws CustomException;
-    boolean updateTypeJob(TypeJobRequest typeJobRequest, Integer updateId) throws CustomException;
+    boolean updateTypeJob(TypeJobRequest typeJobRequest) throws CustomException;
     boolean deleteByIdTypeJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
 }
