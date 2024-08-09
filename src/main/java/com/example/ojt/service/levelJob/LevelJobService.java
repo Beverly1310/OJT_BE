@@ -30,32 +30,38 @@ public class LevelJobService implements ILevelJobService{
 
     @Override
     public boolean addLevelJob(LevelJobRequest levelJobRequest) throws CustomException {
-        try {
-            LevelJob levelJob = new LevelJob();
-            levelJob.setName(levelJobRequest.getName());
-            levelJobRepository.save(levelJob);
-            return true;
-        } catch (Exception e) {
-            throw new CustomException("Lỗi khi thêm LevelJob", HttpStatus.INTERNAL_SERVER_ERROR);
+        Optional<LevelJob> existingJob = levelJobRepository.findByName(levelJobRequest.getName());
+        if (existingJob.isPresent()) {
+            throw new CustomException("LevelJob name already exists", HttpStatus.CONFLICT);
         }
+
+        LevelJob levelJob = new LevelJob();
+        levelJob.setName(levelJobRequest.getName());
+        levelJobRepository.save(levelJob);
+        return true;
     }
 
     @Override
     public boolean updateLevelJob(LevelJobRequest levelJobRequest) throws CustomException {
-        try {
-            Optional<LevelJob> existingJob = levelJobRepository.findById(levelJobRequest.getId());
-            if (existingJob.isPresent()) {
-                LevelJob levelJob = existingJob.get();
-                levelJob.setName(levelJobRequest.getName());
-                levelJobRepository.save(levelJob);
-                return true;
-            } else {
-                throw new CustomException("LevelJob not found", HttpStatus.NOT_FOUND);
+        Optional<LevelJob> existingJob = levelJobRepository.findById(levelJobRequest.getId());
+        if (existingJob.isPresent()) {
+            LevelJob levelJob = existingJob.get();
+
+            // Kiểm tra xem tên mới có tồn tại và không phải của LevelJob hiện tại
+            Optional<LevelJob> duplicateJob = levelJobRepository.findByName(levelJobRequest.getName());
+            if (duplicateJob.isPresent() && !duplicateJob.get().getId().equals(levelJob.getId())) {
+                throw new CustomException("LevelJob name already exists", HttpStatus.CONFLICT);
             }
-        } catch (Exception e) {
-            throw new CustomException("Error updating LevelJob", HttpStatus.INTERNAL_SERVER_ERROR);
+
+            levelJob.setName(levelJobRequest.getName());
+            levelJobRepository.save(levelJob);
+            return true;
+        } else {
+            throw new CustomException("LevelJob not found", HttpStatus.NOT_FOUND);
         }
     }
+
+
 
     @Override
     public boolean deleteByIdLevelJob(Integer deleteId) throws CustomException {

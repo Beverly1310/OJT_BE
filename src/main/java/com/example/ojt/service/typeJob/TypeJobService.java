@@ -32,32 +32,41 @@ public class TypeJobService implements ITypeJobService {
 
     @Override
     public boolean addTypeJob(TypeJobRequest typeJobRequest) throws CustomException {
-        try {
-            TypeJob typeJob = new TypeJob();
+        // Kiểm tra xem tên TypeJob đã tồn tại chưa
+        Optional<TypeJob> existingJob = typeJobRepository.findByName(typeJobRequest.getName());
+        if (existingJob.isPresent()) {
+            throw new CustomException("TypeJob name already exists", HttpStatus.CONFLICT);
+        }
+
+        // Nếu tên chưa tồn tại, tiếp tục thêm mới
+        TypeJob typeJob = new TypeJob();
+        typeJob.setName(typeJobRequest.getName());
+        typeJobRepository.save(typeJob);
+        return true;
+    }
+
+
+    @Override
+    public boolean updateTypeJob(TypeJobRequest typeJobRequest) throws CustomException {
+        Optional<TypeJob> existingJob = typeJobRepository.findById(typeJobRequest.getId());
+        if (existingJob.isPresent()) {
+            TypeJob typeJob = existingJob.get();
+
+            // Kiểm tra xem tên mới có tồn tại và không phải của TypeJob hiện tại
+            Optional<TypeJob> duplicateJob = typeJobRepository.findByName(typeJobRequest.getName());
+            if (duplicateJob.isPresent() && !duplicateJob.get().getId().equals(typeJob.getId())) {
+                throw new CustomException("TypeJob name already exists", HttpStatus.CONFLICT);
+            }
+
+            // Nếu tên hợp lệ, tiếp tục cập nhật
             typeJob.setName(typeJobRequest.getName());
             typeJobRepository.save(typeJob);
             return true;
-        } catch (Exception e) {
-            throw new CustomException("Lỗi khi thêm TypeJob", HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            throw new CustomException("TypeJob not found", HttpStatus.NOT_FOUND);
         }
     }
 
-     @Override
-    public boolean updateTypeJob(TypeJobRequest typeJobRequest) throws CustomException {
-        try {
-            Optional<TypeJob> existingJob = typeJobRepository.findById(typeJobRequest.getId());
-            if (existingJob.isPresent()) {
-                TypeJob typeJob = existingJob.get();
-                typeJob.setName(typeJobRequest.getName());
-                typeJobRepository.save(typeJob);
-                return true;
-            } else {
-                throw new CustomException("TypeJob not found", HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            throw new CustomException("Error updating TypeJob", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
 
     @Override

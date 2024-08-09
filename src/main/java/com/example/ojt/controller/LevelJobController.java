@@ -45,7 +45,7 @@ public class LevelJobController {
         }
     }
     @PutMapping
-    public ResponseEntity<?> updateLevelJob(@RequestBody @Valid LevelJobRequest levelJobRequest) {
+    public ResponseEntity<?> updateLevelJob(@RequestBody LevelJobRequest levelJobRequest) {
         try {
             boolean isUpdated = levelJobService.updateLevelJob(levelJobRequest);
             if (isUpdated) {

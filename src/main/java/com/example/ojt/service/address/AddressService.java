@@ -1,5 +1,6 @@
 package com.example.ojt.service.address;
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.AddAddressCompanyRequest;
 import com.example.ojt.model.dto.request.AddressCompanyRequest;
 import com.example.ojt.model.dto.response.AddressCompanyResponse;
 import com.example.ojt.model.entity.AddressCompany;
@@ -31,8 +32,8 @@ public class AddressService implements IAddressService {
     private ILocationRepository locationRepository;
 
 
-    private  Company getCurrentCompany(){
-        Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId());
+    private  Company getCurrentCompany() throws CustomException {
+        Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
     }
 
@@ -48,7 +49,7 @@ public class AddressService implements IAddressService {
     }
 
     @Override
-    public boolean addAddressCompany(AddressCompanyRequest addressCompanyRequest) throws CustomException {
+    public boolean addAddressCompany(AddAddressCompanyRequest addressCompanyRequest) throws CustomException {
         AddressCompany addressCompany = AddressCompany.builder()
                 .address(addressCompanyRequest.getAddress())
                 .mapUrl(addressCompanyRequest.getMapUrl())

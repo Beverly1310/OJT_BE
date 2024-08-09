@@ -28,35 +28,41 @@ public class TypeCompanyService implements ITypeCompanyService{
         }
         return typeCompanies;
     }
-
     @Override
     public boolean addTypeCompany(TypeCompanyRequest typeCompanyRequest) throws CustomException {
-        try {
-            TypeCompany typeCompany = new TypeCompany();
-            typeCompany.setName(typeCompanyRequest.getName());
-            typeCompanyRepository.save(typeCompany);
-            return true;
-        } catch (Exception e) {
-            throw new CustomException("Error adding TypeCompany", HttpStatus.INTERNAL_SERVER_ERROR);
+        // Kiểm tra xem tên đã tồn tại hay chưa
+        Optional<TypeCompany> existingCompany = typeCompanyRepository.findByName(typeCompanyRequest.getName());
+        if (existingCompany.isPresent()) {
+            throw new CustomException("TypeCompany name already exists", HttpStatus.CONFLICT);
         }
+
+        TypeCompany typeCompany = new TypeCompany();
+        typeCompany.setName(typeCompanyRequest.getName());
+        typeCompanyRepository.save(typeCompany);
+        return true;
     }
+
 
     @Override
     public boolean updateTypeCompany(TypeCompanyRequest typeCompanyRequest) throws CustomException {
-        try {
-            Optional<TypeCompany> existingCompany = typeCompanyRepository.findById(typeCompanyRequest.getId());
-            if (existingCompany.isPresent()) {
-                TypeCompany typeCompany = existingCompany.get();
-                typeCompany.setName(typeCompanyRequest.getName());
-                typeCompanyRepository.save(typeCompany);
-                return true;
-            } else {
-                throw new CustomException("TypeCompany not found", HttpStatus.NOT_FOUND);
+        Optional<TypeCompany> existingCompany = typeCompanyRepository.findById(typeCompanyRequest.getId());
+        if (existingCompany.isPresent()) {
+            TypeCompany typeCompany = existingCompany.get();
+
+            // Kiểm tra xem tên mới đã tồn tại hay chưa và không phải của TypeCompany hiện tại
+            Optional<TypeCompany> duplicateCompany = typeCompanyRepository.findByName(typeCompanyRequest.getName());
+            if (duplicateCompany.isPresent() && !duplicateCompany.get().getId().equals(typeCompany.getId())) {
+                throw new CustomException("TypeCompany name already exists", HttpStatus.CONFLICT);
             }
-        } catch (Exception e) {
-            throw new CustomException("Error updating TypeCompany", HttpStatus.INTERNAL_SERVER_ERROR);
+
+            typeCompany.setName(typeCompanyRequest.getName());
+            typeCompanyRepository.save(typeCompany);
+            return true;
+        } else {
+            throw new CustomException("TypeCompany not found", HttpStatus.NOT_FOUND);
         }
     }
+
 
 
     @Override

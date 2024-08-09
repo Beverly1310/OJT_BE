@@ -1,11 +1,13 @@
 package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.JobAddRequest;
 import com.example.ojt.model.dto.request.JobRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
 import com.example.ojt.service.job.JobService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +36,7 @@ public class JobController {
         return ResponseEntity.ok().body(jobService.findAll(sortPageable,search));
     }
     @PostMapping
-    public ResponseEntity<?> addJob(@RequestBody JobRequest jobRequest) {
+    public ResponseEntity<?> addJob(@Valid @RequestBody JobAddRequest jobRequest) {
         try {
             boolean isAdded = jobService.addJob(jobRequest);
             if (isAdded) {
