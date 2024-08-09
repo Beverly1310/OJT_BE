@@ -12,9 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AddressCompanyRequest {
-    private Integer id;
+public class AddAddressCompanyRequest {
+    @NotEmpty(message = "Please fill address!")
+    @NotBlank(message = "Please fill address!")
     private String address;
+    @NotEmpty(message = "Please fill mapUrl!")
     private String mapUrl;
+    @NotNull(message = "Please fill location!")
     private Integer location;
 }

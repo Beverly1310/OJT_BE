@@ -15,7 +15,6 @@ public class RegisterAccountCompanyRequest {
     private String password;
     @NotBlank(message = "confirmPassword must be not blank")
     private String confirmPassword;
-    private String roleName ;
     @NotEmpty(message = "Please fill nameCompany!")
     private String name;
     @NotEmpty(message = "Please fill phone!")

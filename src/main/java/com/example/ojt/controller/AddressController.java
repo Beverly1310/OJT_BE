@@ -1,6 +1,7 @@
 package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.AddAddressCompanyRequest;
 import com.example.ojt.model.dto.request.AddressCompanyRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.AddressCompanyResponse;
@@ -46,7 +47,7 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addAddressCompany(@RequestBody AddressCompanyRequest addressCompanyRequest) throws CustomException {
+    public ResponseEntity<?> addAddressCompany(@Valid @RequestBody AddAddressCompanyRequest addressCompanyRequest) throws CustomException {
         boolean check = addressService.addAddressCompany(addressCompanyRequest);
         if (check) {
             APIResponse response = new APIResponse(200, "add Address Company successful");
@@ -57,7 +58,7 @@ public class AddressController {
     }
 
     @PutMapping()
-    public ResponseEntity<?> updateAddressCompany(@RequestBody AddressCompanyRequest addressCompanyRequest) throws CustomException {
+    public ResponseEntity<?> updateAddressCompany( @RequestBody AddressCompanyRequest addressCompanyRequest) throws CustomException {
         boolean check = addressService.updateAddressCompany(addressCompanyRequest);
         if (check) {
             APIResponse response = new APIResponse(200, "update  Address  success");

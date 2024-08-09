@@ -2,11 +2,13 @@ package com.example.ojt.service.job;
 
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.JobAddRequest;
 import com.example.ojt.model.dto.request.JobRequest;
 import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
+import com.example.ojt.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class JobService implements IJobService{
     @Autowired
     private IJobRepository jobRepository;
@@ -40,6 +43,10 @@ public class JobService implements IJobService{
     @Autowired
     private ITypesJobsRepository typesJobsRepository;
 
+    private  Company getCurrentCompany() throws CustomException {
+        Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
+        return company;
+    }
     @Override
     public Page<JobResponse> findAll(Pageable pageable, String search) {
         Page<Job> jobs;
@@ -70,13 +77,14 @@ public class JobService implements IJobService{
 
     @Override
     @Transactional
-    public boolean addJob(JobRequest jobRequest) throws CustomException {
-        try {
-            Company company = companyRepository.findById(jobRequest.getCompanyId())
-                    .orElseThrow(() -> new CustomException("Company not found", HttpStatus.NOT_FOUND));
+    public boolean addJob(JobAddRequest jobRequest) throws CustomException {
+
+
             AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
                     .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
-
+            if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null)!=null){
+                throw  new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+            }
             Job job = Job.builder()
                     .title(jobRequest.getTitle())
                     .description(jobRequest.getDescription())
@@ -85,11 +93,11 @@ public class JobService implements IJobService{
                     .expireAt(jobRequest.getExpireAt())
                     .createdAt(new Timestamp(new Date().getTime()))
                     .status(1)
-                    .company(company)
+                    .company(getCurrentCompany())
                     .addressCompany(addressCompany)
                     .build();
+        jobRepository.save(job);
 
-            jobRepository.save(job);
 
             List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
             for (LevelJob levelJob : levelJobs) {
@@ -110,9 +118,7 @@ public class JobService implements IJobService{
             }
 
             return true;
-        } catch (Exception e) {
-            throw new CustomException("Failed to add job", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
     }
     @Override
     @Transactional
@@ -120,7 +126,10 @@ public class JobService implements IJobService{
         try {
             Job job = jobRepository.findById(jobRequest.getId())
                     .orElseThrow(() -> new CustomException("Job not found", HttpStatus.NOT_FOUND));
-
+            Job jobCheck = jobRepository.findByTitle(job.getTitle()).orElse(null);
+            if (jobCheck!=null && jobCheck.getId()!=job.getId()){
+                throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+            }
             if (jobRequest.getTitle() != null && !jobRequest.getTitle().isEmpty()) {
                 job.setTitle(jobRequest.getTitle());
             }
@@ -180,7 +189,7 @@ public class JobService implements IJobService{
 
     @Override
     public boolean deleteJob(Integer deleteId) throws CustomException {
-        Job job = jobRepository.findById(deleteId).orElseThrow(()-> new CustomException("Job not found", HttpStatus.NOT_FOUND));
+        Job job = jobRepository.findByIdAndCompany(deleteId,getCurrentCompany()).orElseThrow(()-> new CustomException("Job not found", HttpStatus.NOT_FOUND));
         job.setStatus(2);
         jobRepository.save(job);
         return true;
