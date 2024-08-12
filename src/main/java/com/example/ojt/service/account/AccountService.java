@@ -180,15 +180,14 @@ public class AccountService implements IAccountService {
         if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
-        Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
-                .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+
         Integer otp = otpGenerator();
         Account account = Account.builder()
                 .email(registerAccount.getEmailCompany())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
                 .otp(otp)
                 .status(0)
-                .role(role)
+                .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_COMPANY")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
                 .build();
 
         // Save account to get the ID

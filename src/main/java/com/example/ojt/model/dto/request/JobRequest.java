@@ -22,5 +22,4 @@ public class JobRequest {
     private Integer addressCompanyId;
     private List<Integer> levelJobIds;
     private List<Integer> typeJobIds;
-
 }
