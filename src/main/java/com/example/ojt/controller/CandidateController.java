@@ -108,7 +108,7 @@ public class CandidateController {
         return new ResponseEntity<>(new DataResponse<>(response, experienceCandidate), HttpStatus.OK);
    }
    @PutMapping("/experience")
-    public ResponseEntity<?> editExperience(@RequestBody UpdateExpCandidateReq updateExpCandidateReq) throws CustomException {
+    public ResponseEntity<?> editExperience(@Valid @RequestBody UpdateExpCandidateReq updateExpCandidateReq) throws CustomException {
         boolean check = candidateService.editExperienceCandidate(updateExpCandidateReq);
         if (check) {
             APIResponse response = new APIResponse(200, "Update experience success");
@@ -162,7 +162,7 @@ public class CandidateController {
         }
    }
    @PutMapping("/certificate")
-    public ResponseEntity<?> editCertificate(@RequestBody UpdateCertificateReq updateCertificateReq) throws CustomException {
+    public ResponseEntity<?> editCertificate(@Valid @RequestBody UpdateCertificateReq updateCertificateReq) throws CustomException {
         boolean check = candidateService.editCertificate(updateCertificateReq);
         if (check) {
             APIResponse response = new APIResponse(200, "Update certificate success");
@@ -202,7 +202,7 @@ public class CandidateController {
        return new ResponseEntity<>(new DataResponse<>(response, projectCandidate), HttpStatus.OK);
    }
    @PutMapping("/project")
-    public ResponseEntity<?> editProject(@RequestBody UpdateProjectReq updateProjectReq) throws CustomException {
+    public ResponseEntity<?> editProject(@Valid @RequestBody UpdateProjectReq updateProjectReq) throws CustomException {
        boolean check = candidateService.editProject(updateProjectReq);
        if (check) {
            APIResponse response = new APIResponse(200, "Update project success");
@@ -245,7 +245,7 @@ public class CandidateController {
        return new ResponseEntity<>(new DataResponse<>(response, skillCandidate), HttpStatus.OK);
    }
    @PutMapping("/skill")
-    public ResponseEntity<?> editSkill(@RequestBody UpdateSkillReq updateSkillReq) throws CustomException {
+    public ResponseEntity<?> editSkill(@Valid @RequestBody UpdateSkillReq updateSkillReq) throws CustomException {
        boolean check = candidateService.updateSkill(updateSkillReq);
        if (check) {
            APIResponse response = new APIResponse(200, "Update skill success");
