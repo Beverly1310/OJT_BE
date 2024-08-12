@@ -34,4 +34,5 @@ public interface IAccountService {
 
     void requestPasswordChange(PasswordChangeRequest request) throws CustomException;
 
+    boolean resendOtp(String email) throws CustomException;
 }
