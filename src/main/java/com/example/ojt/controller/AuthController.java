@@ -82,10 +82,10 @@ public class AuthController {
     }
 
 
-    @PutMapping("/company/verify")
+    @PutMapping("/verify")
     public ResponseEntity<?> verifyCompanyOtp(@RequestParam String email, @RequestParam Integer otp) throws
             CustomException {
-        if (accountService.companyVerify(email, otp)) {
+        if (accountService.accountVerify(email, otp)) {
             APIResponse response = new APIResponse(200, "Verify successfully");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {

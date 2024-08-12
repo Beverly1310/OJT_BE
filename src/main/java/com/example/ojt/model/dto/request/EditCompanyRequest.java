@@ -34,4 +34,7 @@ public class EditCompanyRequest {
     private String policy;
 
     private Integer typeCompany;
+    private String address;
+    private String mapUrl;
+    private Integer locationId;
 }

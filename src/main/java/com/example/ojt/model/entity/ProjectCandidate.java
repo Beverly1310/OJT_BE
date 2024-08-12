@@ -1,5 +1,6 @@
 package com.example.ojt.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +24,9 @@ public class ProjectCandidate {
     @Column(name = "end_at", columnDefinition = "VARCHAR(20)")
     private Date endAt;
     private String info;
-    private Integer status;
+
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 }

@@ -71,10 +71,6 @@ public class AccountService implements IAccountService {
     private ICandidateRepository candidateRepository;
     @Autowired
     private UploadService uploadService;
-
-    public static AccountDetailsCustom getCurrentUser() {
-        return (AccountDetailsCustom) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -82,6 +78,10 @@ public class AccountService implements IAccountService {
     @Autowired
     private BackupPasswordGenerator passwordGenerator;
 
+
+    public static AccountDetailsCustom getCurrentUser() {
+        return (AccountDetailsCustom) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
     @Override
     public JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException {
         Account account = accountRepository.findByEmail(loginAccountRequest.getEmail())
@@ -114,7 +114,7 @@ public class AccountService implements IAccountService {
                 authentication = manager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginAccountRequest.getEmail(), loginAccountRequest.getPassword()));
             } catch (AuthenticationException e) {
-                throw new CustomException("Email or password incorrect", HttpStatus.NOT_FOUND);
+                throw new CustomException("Email or password incorrect or account hasn't verify", HttpStatus.NOT_FOUND);
             }
 
             AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();
@@ -144,11 +144,13 @@ public class AccountService implements IAccountService {
         if (!registerAccountCandidate.getPassword().equals(registerAccountCandidate.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
+        Integer otp = otpGenerator();
         Account account = Account.builder()
                 .name(registerAccountCandidate.getName())
                 .email(registerAccountCandidate.getEmail())
                 .password(passwordEncoder.encode(registerAccountCandidate.getPassword()))
-                .status(1)
+                .otp(otp)
+                .status(0)
                 .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_CANDIDATE")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
                 .build();
         Candidate candidate = Candidate.builder()
@@ -158,6 +160,8 @@ public class AccountService implements IAccountService {
                 .createdAt(new Date())
                 .avatar("https://png.pngtree.com/png-vector/20220608/ourmid/pngtree-man-avatar-isolated-on-white-background-png-image_4891418.png")
                 .build();
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"Verify account","Your otp is: "+otp));
+
         candidateRepository.save(candidate);
         accountRepository.save(account);
         return true;
@@ -176,15 +180,14 @@ public class AccountService implements IAccountService {
         if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
-        Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
-                .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+
         Integer otp = otpGenerator();
         Account account = Account.builder()
                 .email(registerAccount.getEmailCompany())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
                 .otp(otp)
                 .status(0)
-                .role(role)
+                .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_COMPANY")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
                 .build();
 
         // Save account to get the ID
@@ -206,18 +209,17 @@ public class AccountService implements IAccountService {
                 .createdAt(new Date())
                 .status(1)
                 .build();
-
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
         companyRepository.save(company);
         addressCompanyRepository.save(addressCompany);
 
-        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
+
         return true;
     }
 
     @Override
     public boolean updateCandidate(UpdateAccountCandidate updateAccountCandidate) throws CustomException {
         Candidate candidate = candidateRepository.findById(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
-//        Candidate candidate = candidateRepository.findById(1).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
         if (updateAccountCandidate.getAboutMe() != null && !updateAccountCandidate.getAboutMe().isBlank()) {
             candidate.setAboutme(updateAccountCandidate.getAboutMe());
         }
@@ -377,7 +379,7 @@ public class AccountService implements IAccountService {
         }
     }
     @Override
-    public boolean companyVerify(String email, Integer otp) throws CustomException {
+    public boolean accountVerify(String email, Integer otp) throws CustomException {
         Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("account not found", HttpStatus.NOT_FOUND) );
         if (otp.equals( account.getOtp())){
             account.setStatus(1);

@@ -1,11 +1,12 @@
 package com.example.ojt.model.dto.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Date;
-
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class AddressCompanyResponse {
     private Integer id;
