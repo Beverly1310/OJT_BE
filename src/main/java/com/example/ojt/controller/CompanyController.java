@@ -32,12 +32,12 @@ public class CompanyController {
             return ResponseEntity.status(500).body("Lỗi ko mong muốn");
         }
     }
-    @GetMapping("/viewCandidateCV/{candidateId}")
+    @GetMapping("viewCandidateCV/{candidateId}")
     public ResponseEntity<?> viewCandidateCV(@PathVariable Integer candidateId) throws CustomException{
         return ResponseEntity.ok(candidateService.getCandidateCV(candidateId));
     }
 
-    @GetMapping("/viewCandidateInfo/{candidateId}")
+    @GetMapping("viewCandidateInfo/{candidateId}")
     public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
         return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
     }
