@@ -125,6 +125,8 @@ public class AccountService implements IAccountService {
             String accessToken = jwtProvider.generateAccessToken(detailsCustom);
             return JWTResponse.builder()
                     .email(detailsCustom.getEmail())
+                    .avatar(detailsCustom.getAvatar())
+                    .name(detailsCustom.getName())
                     .roleName(detailsCustom.getRoleName())
                     .status(detailsCustom.getStatus())
                     .accessToken(accessToken)
