@@ -1,9 +1,6 @@
 package com.example.ojt.model.dto.response;
 
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,7 +10,9 @@ import java.util.Collection;
 public class JWTResponse {
     private final String type = "Bearer";
     private String accessToken ;
+    private String name;
     private String email;
+    private String avatar;
     private String roleName;
     private Integer status;
 }

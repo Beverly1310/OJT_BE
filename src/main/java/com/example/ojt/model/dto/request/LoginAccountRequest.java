@@ -1,6 +1,7 @@
 package com.example.ojt.model.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -18,4 +19,7 @@ public class LoginAccountRequest {
     @NotEmpty(message = "Please fill password!")
     @Size(min = 4, max = 12, message = "Password's length must be between 4 and 12")
     private String password;
+    @NotEmpty(message = "Role cannot be empty!")
+    @NotBlank(message = "Role cannot be blank!")
+    private String role;
 }
