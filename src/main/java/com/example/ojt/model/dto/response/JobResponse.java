@@ -1,8 +1,10 @@
 package com.example.ojt.model.dto.response;
 
+import com.example.ojt.model.entity.TypeJob;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,4 +23,6 @@ public class JobResponse {
     private String companyName;
     private String address;
     private String city;
+    private String companyLogo;
+    private Set<String> typeJob;
 }

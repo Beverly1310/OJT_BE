@@ -1,11 +1,13 @@
 package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.model.dto.request.JobAddRequest;
 import com.example.ojt.model.dto.request.JobRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
 import com.example.ojt.service.job.JobService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,18 +25,20 @@ public class JobController {
 
     private final JobService jobService;
 
+
     @GetMapping
     public ResponseEntity<Page<JobResponse>> getJobs(
-
             @PageableDefault(page = 0, size = 3, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
-            @RequestParam(defaultValue = "")String search,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String location,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "ASC") String direction) {
-        Pageable sortPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),Sort.by(Sort.Direction.fromString(direction),sort));
-        return ResponseEntity.ok().body(jobService.findAll(sortPageable,search));
+        Pageable sortPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.fromString(direction), sort));
+        return ResponseEntity.ok().body(jobService.findAll(sortPageable, search, location));
     }
     @PostMapping
-    public ResponseEntity<?> addJob(@RequestBody JobRequest jobRequest) {
+    public ResponseEntity<?> addJob(@Valid @RequestBody JobAddRequest jobRequest) {
         try {
             boolean isAdded = jobService.addJob(jobRequest);
             if (isAdded) {

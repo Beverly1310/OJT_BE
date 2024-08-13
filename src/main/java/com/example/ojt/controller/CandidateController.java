@@ -6,6 +6,7 @@ import com.example.ojt.model.dto.request.*;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
 import com.example.ojt.model.dto.request.UpdateAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
+import com.example.ojt.model.dto.response.UserInfo;
 import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.service.candidate.ICandidateService;
@@ -108,7 +109,7 @@ public class CandidateController {
         return new ResponseEntity<>(new DataResponse<>(response, experienceCandidate), HttpStatus.OK);
    }
    @PutMapping("/experience")
-    public ResponseEntity<?> editExperience(@RequestBody UpdateExpCandidateReq updateExpCandidateReq) throws CustomException {
+    public ResponseEntity<?> editExperience(@Valid @RequestBody UpdateExpCandidateReq updateExpCandidateReq) throws CustomException {
         boolean check = candidateService.editExperienceCandidate(updateExpCandidateReq);
         if (check) {
             APIResponse response = new APIResponse(200, "Update experience success");
@@ -162,7 +163,7 @@ public class CandidateController {
         }
    }
    @PutMapping("/certificate")
-    public ResponseEntity<?> editCertificate(@RequestBody UpdateCertificateReq updateCertificateReq) throws CustomException {
+    public ResponseEntity<?> editCertificate(@Valid @RequestBody UpdateCertificateReq updateCertificateReq) throws CustomException {
         boolean check = candidateService.editCertificate(updateCertificateReq);
         if (check) {
             APIResponse response = new APIResponse(200, "Update certificate success");
@@ -202,7 +203,7 @@ public class CandidateController {
        return new ResponseEntity<>(new DataResponse<>(response, projectCandidate), HttpStatus.OK);
    }
    @PutMapping("/project")
-    public ResponseEntity<?> editProject(@RequestBody UpdateProjectReq updateProjectReq) throws CustomException {
+    public ResponseEntity<?> editProject(@Valid @RequestBody UpdateProjectReq updateProjectReq) throws CustomException {
        boolean check = candidateService.editProject(updateProjectReq);
        if (check) {
            APIResponse response = new APIResponse(200, "Update project success");
@@ -247,7 +248,7 @@ public class CandidateController {
        return new ResponseEntity<>(new DataResponse<>(response, skillCandidate), HttpStatus.OK);
    }
    @PutMapping("/skill")
-    public ResponseEntity<?> editSkill(@RequestBody UpdateSkillReq updateSkillReq) throws CustomException {
+    public ResponseEntity<?> editSkill(@Valid @RequestBody UpdateSkillReq updateSkillReq) throws CustomException {
        boolean check = candidateService.updateSkill(updateSkillReq);
        if (check) {
            APIResponse response = new APIResponse(200, "Update skill success");
@@ -265,5 +266,11 @@ public class CandidateController {
        } else {
            throw new CustomException("Delete skill fail", HttpStatus.BAD_REQUEST);
        }
+   }
+   @GetMapping("/info")
+    public ResponseEntity<?> getInfo(){
+       UserInfo userInfo = candidateService.getInfoByUser();
+       APIResponse response = new APIResponse(200, "Get info success");
+       return new ResponseEntity<>(new DataResponse<>(response, userInfo), HttpStatus.OK);
    }
 }

@@ -119,12 +119,14 @@ public class AccountService implements IAccountService {
 
             AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();
             if (detailsCustom.getStatus() == 2) {
-                throw new CustomException("Account has been blocked!", HttpStatus.FORBIDDEN);
+                throw new CustomException("Account has been blocked!", HttpStatus.UNAUTHORIZED);
             }
 
             String accessToken = jwtProvider.generateAccessToken(detailsCustom);
             return JWTResponse.builder()
                     .email(detailsCustom.getEmail())
+                    .avatar(detailsCustom.getAvatar())
+                    .name(detailsCustom.getName())
                     .roleName(detailsCustom.getRoleName())
                     .status(detailsCustom.getStatus())
                     .accessToken(accessToken)
@@ -181,15 +183,14 @@ public class AccountService implements IAccountService {
         if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
             throw new CustomException("Password do not match!", HttpStatus.BAD_REQUEST);
         }
-        Role role = roleRepository.findByRoleName(RoleName.valueOf(registerAccount.getRoleName()))
-                .orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND));
+
         Integer otp = otpGenerator();
         Account account = Account.builder()
                 .email(registerAccount.getEmailCompany())
                 .password(passwordEncoder.encode(registerAccount.getPassword()))
                 .otp(otp)
                 .status(0)
-                .role(role)
+                .role(roleRepository.findByRoleName(RoleName.valueOf("ROLE_COMPANY")).orElseThrow(() -> new CustomException("Role not found", HttpStatus.NOT_FOUND)))
                 .build();
 
         // Save account to get the ID
@@ -382,13 +383,26 @@ public class AccountService implements IAccountService {
     }
     @Override
     public boolean accountVerify(String email, Integer otp) throws CustomException {
-        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("account not found", HttpStatus.NOT_FOUND) );
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND) );
         if (otp.equals( account.getOtp())){
             account.setStatus(1);
             account.setOtp(null);
         }else {
             throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
         }
+        return true;
+    }
+
+    @Override
+    public boolean resendOtp(String email) throws CustomException {
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND) );
+        if (account.getStatus()==1){
+            throw new CustomException("Your account has been verify",HttpStatus.BAD_REQUEST);
+        }
+        Integer otp = otpGenerator();
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"Verify account","Your otp is: "+otp));
+        account.setOtp(otp);
+        accountRepository.save(account);
         return true;
     }
 }

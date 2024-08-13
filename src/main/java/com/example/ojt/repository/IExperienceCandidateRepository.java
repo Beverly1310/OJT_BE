@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IExperienceCandidateRepository extends JpaRepository<ExperienceCandidate, Integer> {
@@ -18,4 +19,6 @@ public interface IExperienceCandidateRepository extends JpaRepository<Experience
     Page<ExperienceCandidate> findByCandidate(Candidate candidate, Pageable pageable);
 
     Optional<ExperienceCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
+
+    List<ExperienceCandidate> findAllByCandidate(Candidate candidate);
 }

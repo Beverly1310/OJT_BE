@@ -72,10 +72,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
 //                        auth.requestMatchers("/admin/**").hasRole("ADMIN"))
-                                auth.requestMatchers(
-                                                "/api.myservice.com/v1/admin/**").hasAuthority("ROLE_ADMIN")
-                                        .requestMatchers("/api.myservice.com/v1/candidate/**").hasAuthority("ROLE_CANDIDATE")
-                                        .requestMatchers("/api.myservice.com/v1/company/**").hasAuthority("ROLE_COMPANY")
+                                auth
+//                                        .requestMatchers("/api.myservice.com/v1/admin/**").hasAuthority("ROLE_ADMIN")
+//                                        .requestMatchers("/api.myservice.com/v1/candidate/**").hasAuthority("ROLE_CANDIDATE")
+//                                        .requestMatchers("/api.myservice.com/v1/company/**").hasAuthority("ROLE_COMPANY")
 //                                        .requestMatchers("/api.myservice.com/v1/user-manager/**", "/user-client/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER")
                                         .anyRequest().permitAll() // tất cả quyền
                 )

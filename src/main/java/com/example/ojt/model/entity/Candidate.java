@@ -1,4 +1,5 @@
 package com.example.ojt.model.entity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
@@ -17,6 +18,7 @@ public class Candidate {
     private String name;
     private int status;
     @Column(name = "birthday")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private Date birthday;
     private String address;
     @Column(name = "phone", columnDefinition = "VARCHAR(20)")
