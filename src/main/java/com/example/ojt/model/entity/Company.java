@@ -1,7 +1,6 @@
 package com.example.ojt.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +22,9 @@ public class Company {
     private String website;
     private String linkFacebook;
     private String linkLinkedin;
-    private Integer followers;
-    private Integer size;
+    private String linkGithub;
+    private int followers;
+    private int size;
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     private String phone;
@@ -39,7 +39,6 @@ public class Company {
 
     @OneToOne
     @JoinColumn(name = "account_id")
-    @JsonIgnore
     private Account account;
 
     @OneToMany(mappedBy = "company")

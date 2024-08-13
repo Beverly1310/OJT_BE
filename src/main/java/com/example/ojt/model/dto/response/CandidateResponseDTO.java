@@ -1,7 +1,11 @@
 package com.example.ojt.model.dto.response;
 
 import com.example.ojt.model.entity.Candidate;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 @NoArgsConstructor
@@ -9,20 +13,20 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-    public class CandidateResponseDTO {
+public class CandidateResponseDTO {
     private Integer id;
     private String name;
-    private Date birthday;
+    private String birthday;
     private String address;
     private String phone;
-    private Boolean gender;
+    private String gender;
     private String linkLinkedin;
     private String linkGit;
     private String position;
     private String avatar;
     private String aboutme;
     private Integer status;
-    private Date createAt ;
+    private Date createAt = new Date();
     private String account;
     public CandidateResponseDTO (Candidate candidate) {
         this.id = candidate.getId();

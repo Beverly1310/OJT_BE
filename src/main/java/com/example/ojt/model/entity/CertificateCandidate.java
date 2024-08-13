@@ -1,7 +1,5 @@
 package com.example.ojt.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,16 +17,13 @@ public class CertificateCandidate {
     private Integer id;
     private String name;
     private String organization;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    @Column(name = "start_at")
-    private Date startAt;
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    @Column(name = "end_at")
-    private Date endAt;
+    @Column(name = "start_at", columnDefinition = "VARCHAR(20)")
+    private String startAt;
+    @Column(name = "end_at", columnDefinition = "VARCHAR(20)")
+    private String endAt;
     private String info;
-
+    private int status;
     @ManyToOne
     @JoinColumn(name = "candidate_id")
-    @JsonIgnore
     private Candidate candidate;
 }

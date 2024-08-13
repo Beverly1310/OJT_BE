@@ -18,8 +18,6 @@ import java.util.Set;
 @Builder
 public class AccountDetailsCustom implements UserDetails {
     private Integer id;
-    private String name;
-    private String avatar;
     private String email;
     private String password;
     private Integer status;
@@ -31,7 +29,6 @@ public class AccountDetailsCustom implements UserDetails {
         GrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName().name());
         return AccountDetailsCustom.builder()
                 .id(account.getId())
-                .name(account.getName())
                 .password(account.getPassword())
                 .email(account.getEmail())
                 .authorities(Collections.singletonList(authority))
