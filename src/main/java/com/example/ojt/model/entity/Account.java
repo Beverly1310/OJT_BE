@@ -21,8 +21,10 @@ public class Account {
     private String password;
     private String backupPassword;
     private Integer status;
+    @JsonIgnore
     @OneToOne(mappedBy = "account")
     private Company company;
+    @JsonIgnore
     @OneToOne(mappedBy = "account")
     private Candidate candidate;
     private Integer otp;

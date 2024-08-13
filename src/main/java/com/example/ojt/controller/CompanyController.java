@@ -71,7 +71,7 @@ public class CompanyController {
         return ResponseEntity.ok(candidateService.getCandidateCV(candidateId));
     }
 
-    @GetMapping("/viewCandidateInfo/{candidateId}")
+    @GetMapping("viewCandidateInfo/{candidateId}")
     public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
         return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
     }

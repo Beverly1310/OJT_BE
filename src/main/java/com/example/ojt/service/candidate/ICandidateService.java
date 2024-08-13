@@ -2,6 +2,7 @@ package com.example.ojt.service.candidate;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.*;
+import com.example.ojt.model.dto.response.UserInfo;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
 import com.example.ojt.model.dto.request.UpdateEduCandidateReq;
@@ -63,6 +64,10 @@ public interface ICandidateService {
     boolean updateSkill(UpdateSkillReq updateSkillReq) throws CustomException;
 
     boolean deleteSkill(Integer id) throws CustomException;
+
     CVResponse getCandidateCV(Integer candidateId) throws CustomException;
+
     CandidateBasicInfoResponse getBasicInfo(Integer candidateId) throws CustomException;
+
+    UserInfo getInfoByUser();
 }

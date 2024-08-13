@@ -1,5 +1,6 @@
 package com.example.ojt.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,9 +19,11 @@ public class ExperienceCandidate {
     private Integer id;
     private String company;
     private String position;
-    @Column(name = "start_at", columnDefinition = "VARCHAR(20)")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(name = "start_at")
     private Date startAt;
-    @Column(name = "end_at", columnDefinition = "VARCHAR(20)")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(name = "end_at")
     private Date endAt;
     private String info;
 

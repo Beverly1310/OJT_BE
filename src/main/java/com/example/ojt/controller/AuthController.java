@@ -29,7 +29,7 @@ public class AuthController {
     public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccountCandidate) throws CustomException {
         boolean check = accountService.registerCandidate(registerAccountCandidate);
         if (check) {
-            APIResponse response = new APIResponse(200, "Register successful");
+            APIResponse response = new APIResponse(200, "Register successful,please verify your account");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             throw new CustomException("Lack of compulsory registration information or invalid information.", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -128,7 +128,16 @@ public class AuthController {
             CustomException {
             accountService.requestPasswordChange(request);
             return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Password changed successfully!", ""));
-
+    }
+    @PutMapping("/resendotp")
+    public ResponseEntity<?> resendOtp(@RequestParam String email) throws CustomException {
+        boolean check = accountService.resendOtp(email);
+        if (check){
+            APIResponse response = new APIResponse(200, "Otp has been send to your email successfully");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            throw new CustomException("Resend otp fail", HttpStatus.BAD_REQUEST);
+        }
     }
 }
 
