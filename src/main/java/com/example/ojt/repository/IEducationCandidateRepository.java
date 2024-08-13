@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,5 +21,7 @@ public interface IEducationCandidateRepository extends JpaRepository<EducationCa
     Optional<EducationCandidate> findByNameEducationAndCandidate(String name, Candidate candidate);
 
     Optional<EducationCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
+
+    List<EducationCandidate> findAllByCandidate(Candidate candidate);
 
 }
