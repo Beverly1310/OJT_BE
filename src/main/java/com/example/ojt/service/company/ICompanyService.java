@@ -2,9 +2,14 @@ package com.example.ojt.service.company;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
+import com.example.ojt.model.dto.response.CompanyResponse;
 import com.example.ojt.model.entity.Company;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ICompanyService {
     boolean update(EditCompanyRequest companyRequest) throws CustomException;
-//    Company findById(Integer id) throws CustomException;
+    Page<CompanyResponse> findAllCompanies(Pageable pageable, String location, String search);
+    CompanyResponse findById(Integer id) throws CustomException;
 }
+

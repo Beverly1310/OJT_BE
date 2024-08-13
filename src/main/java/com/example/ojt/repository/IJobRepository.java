@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface IJobRepository extends JpaRepository<Job,Integer> {
+    Page<Job> findAllByTitleContainsAndAddressCompany_Location_NameCityContains(String title, String nameCity, Pageable pageable);
 Page<Job> findAllByTitleContains(String title , Pageable pageable);
 Optional<Job> findByTitle(String title);
 Optional<Job> findByIdAndCompany(Integer id, Company company);

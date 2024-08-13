@@ -48,12 +48,14 @@ public class JobService implements IJobService{
         return company;
     }
     @Override
-    public Page<JobResponse> findAll(Pageable pageable, String search) {
+    public Page<JobResponse> findAll(Pageable pageable, String search, String location) {
         Page<Job> jobs;
-        if (search.isEmpty()){
+        if (search.isEmpty() && location.isEmpty()) {
             jobs = jobRepository.findAll(pageable);
-        } else {
+        } else if (location.isEmpty()) {
             jobs = jobRepository.findAllByTitleContains(search, pageable);
+        } else {
+            jobs = jobRepository.findAllByTitleContainsAndAddressCompany_Location_NameCityContains(search, location, pageable);
         }
 
         return jobs.map(this::convertToJobResponse);
@@ -72,6 +74,8 @@ public class JobService implements IJobService{
                 .companyName(job.getCompany().getName())
                 .address(job.getAddressCompany().getAddress())
                 .city(job.getAddressCompany().getLocation().getNameCity())
+                .companyLogo(job.getCompany().getLogo())
+                .typeJob(typeJobRepository.findByJobId(job.getId()))
                 .build();
     }
 

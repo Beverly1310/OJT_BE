@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IJobService {
-    Page<JobResponse> findAll(Pageable pageable, String search);
+    Page<JobResponse> findAll(Pageable pageable, String search, String location);
     boolean addJob(JobAddRequest jobRequest) throws CustomException;
     boolean updateJob(JobRequest jobRequest) throws CustomException;
     boolean deleteJob(Integer deleteId) throws CustomException;
