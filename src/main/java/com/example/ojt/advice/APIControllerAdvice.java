@@ -1,8 +1,11 @@
 package com.example.ojt.advice;
 
 import com.example.ojt.exception.*;
+import com.example.ojt.model.dto.response.ErrorResponse;
 import com.example.ojt.model.dto.response.ResponseError;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,16 +38,6 @@ public class APIControllerAdvice {
         return response;
     }
 
-    @ExceptionHandler(CustomException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, Object> customException(CustomException c) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("error" ,new ResponseError(c.getHttpStatus().value(), c.getHttpStatus().name(),c.getMessage()));
-        return map;
-    }
-
-
-
     @ExceptionHandler(NotFoundException.class)
     public Map<String, Object> handleNotFoundException(NotFoundException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
@@ -67,5 +60,27 @@ public class APIControllerAdvice {
         Map<String,Object> map = new HashMap<>();
         map.put("error", new ResponseError(400,"BAD_REQUEST",e.getMessage()));
         return map;
+    }
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<?> handleCustomException(CustomException ex) {
+        HttpStatus status = ex.getHttpStatus();
+        return ResponseEntity.status(status).body(new ErrorResponse(status.value(), ex.getMessage(), status.getReasonPhrase()));
+    }
+
+    @ExceptionHandler(InvalidFormatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,ResponseError> badIdFormat(InvalidFormatException e) {
+        Map<String, ResponseError> map = new HashMap<>();
+        map.put("error", new ResponseError(400, "ID_FORMAT", e.getMessage()));
+        return  map;
+    }
+
+    @ExceptionHandler(IdFormatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,ResponseError> badIdFormat(IdFormatException e) {
+
+        Map<String, ResponseError> map = new HashMap<>();
+        map.put("error", new ResponseError(400, "ID_FORMAT", e.getMessage()));
+        return  map;
     }
 }

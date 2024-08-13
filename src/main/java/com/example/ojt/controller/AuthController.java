@@ -18,17 +18,20 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private IAccountService accountService;
-
-
-    @Autowired
-    private GlobalExceptionHandler globalExceptionHandler;
-
     @PostMapping("/sign-in")
-    public ResponseEntity<JWTResponse> doLogin(@Valid @RequestBody LoginAccountRequest loginAccountRequest) throws Exception {
-        JWTResponse jwtResponse = accountService.login(loginAccountRequest);
-        return ResponseEntity.ok(jwtResponse);
+    public ResponseEntity<?> doLogin(@Valid @RequestBody LoginAccountRequest loginAccountRequest) throws Exception {
+            JWTResponse response = accountService.login(loginAccountRequest);
+            return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Login successful", response));
+
     }
 
+
+    /**
+     * đăng kí ứng viên
+     * @param registerAccountCandidate
+     * @return
+     * @throws CustomException
+     */
     @PostMapping("/candidate/sign-up")
     public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccountCandidate) throws CustomException {
         boolean check = accountService.registerCandidate(registerAccountCandidate);
@@ -86,10 +89,10 @@ public class AuthController {
     }
 
 
-    @PutMapping("/company/verify")
+    @PutMapping("/verify")
     public ResponseEntity<?> verifyCompanyOtp(@RequestParam String email, @RequestParam Integer otp) throws
             CustomException {
-        if (accountService.companyVerify(email, otp)) {
+        if (accountService.accountVerify(email, otp)) {
             APIResponse response = new APIResponse(200, "Verify successfully");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
@@ -101,12 +104,10 @@ public class AuthController {
     @PostMapping("/recoverPassword")
     public ResponseEntity<?> getPasswordFromEmail(@Valid @RequestBody PasswordRequestThroughEmail request) throws
             CustomException {
-        try {
+
             accountService.requestPasswordThroughEmail(request);
             return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "An email containing password has been sent to " + request.getEmail() + "! Please check your email!", ""));
-        } catch (CustomException e) {
-            return globalExceptionHandler.handleCustomException(e);
-        }
+
     }
 
     /**
@@ -132,13 +133,9 @@ public class AuthController {
     @PostMapping("/changePassword")
     public ResponseEntity<?> changePassword(@Valid @RequestBody PasswordChangeRequest request) throws
             CustomException {
-        try {
             accountService.requestPasswordChange(request);
             return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Password changed successfully!", ""));
-        } catch (CustomException e) {
-            return globalExceptionHandler.handleCustomException(e);
 
-        }
     }
 }
 

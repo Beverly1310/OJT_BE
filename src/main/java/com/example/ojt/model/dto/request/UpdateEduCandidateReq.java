@@ -18,5 +18,4 @@ public class UpdateEduCandidateReq {
     private Date startAt;
     private Date endAt;
     private String info;
-    private Integer status;
 }
