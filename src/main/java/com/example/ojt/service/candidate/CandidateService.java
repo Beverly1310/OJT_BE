@@ -529,4 +529,16 @@ public class CandidateService implements ICandidateService {
         response.setLinkGit(candidate.getLinkGit());
         return response;
     }
+
+    @Override
+    public UserInfo getInfoByUser() {
+        return UserInfo.builder()
+                .candidate(getCurrentCandidate())
+                .certificate(certificateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .education(educationCandidateRepository.findAllByCandidate(getCurrentCandidate()))
+                .experience(experienceCandidateRepository.findAllByCandidate(getCurrentCandidate()))
+                .project(projectRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .skillsCandidates(skillCandidateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .build();
+    }
 }

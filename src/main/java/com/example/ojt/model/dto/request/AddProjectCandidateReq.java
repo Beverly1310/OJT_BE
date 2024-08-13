@@ -21,7 +21,7 @@ public class AddProjectCandidateReq {
     @NotBlank(message = "Information of project must not be empty")
     private String info;
     @NotNull(message = "Link of project must not be empty")
-    @NotBlank(message = "Information must not be empty")
+    @NotBlank(message = "Link of project must not be empty")
     private String link;
     private Date startAt;
     private Date endAt;

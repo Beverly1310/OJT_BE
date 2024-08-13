@@ -6,6 +6,7 @@ import com.example.ojt.model.dto.request.*;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
 import com.example.ojt.model.dto.request.UpdateAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
+import com.example.ojt.model.dto.response.UserInfo;
 import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.service.candidate.ICandidateService;
@@ -263,5 +264,11 @@ public class CandidateController {
        } else {
            throw new CustomException("Delete skill fail", HttpStatus.BAD_REQUEST);
        }
+   }
+   @GetMapping("/info")
+    public ResponseEntity<?> getInfo(){
+       UserInfo userInfo = candidateService.getInfoByUser();
+       APIResponse response = new APIResponse(200, "Get info success");
+       return new ResponseEntity<>(new DataResponse<>(response, userInfo), HttpStatus.OK);
    }
 }
