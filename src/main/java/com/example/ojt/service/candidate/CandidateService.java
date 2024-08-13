@@ -472,6 +472,7 @@ public class CandidateService implements ICandidateService {
         Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
         CVResponse response = new CVResponse();
 //        Thiết lập các thông tin cơ bản
+        response.setName(candidate.getName());
         response.setAbout(candidate.getAboutme());
         response.setPhone(candidate.getPhone());
         LocalDate birthDate = candidate.getBirthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -518,6 +519,7 @@ public class CandidateService implements ICandidateService {
         Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
         CandidateBasicInfoResponse response = new CandidateBasicInfoResponse();
 //        Thiết lập các thông tin cơ bản
+        response.setName(candidate.getName()    );
         response.setAbout(candidate.getAboutme());
         response.setPhone(candidate.getPhone());
         LocalDate birthDate = candidate.getBirthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

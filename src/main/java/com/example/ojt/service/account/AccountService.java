@@ -119,12 +119,14 @@ public class AccountService implements IAccountService {
 
             AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();
             if (detailsCustom.getStatus() == 2) {
-                throw new CustomException("Account has been blocked!", HttpStatus.FORBIDDEN);
+                throw new CustomException("Account has been blocked!", HttpStatus.UNAUTHORIZED);
             }
 
             String accessToken = jwtProvider.generateAccessToken(detailsCustom);
             return JWTResponse.builder()
                     .email(detailsCustom.getEmail())
+                    .avatar(detailsCustom.getAvatar())
+                    .name(detailsCustom.getName())
                     .roleName(detailsCustom.getRoleName())
                     .status(detailsCustom.getStatus())
                     .accessToken(accessToken)

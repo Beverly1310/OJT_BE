@@ -19,6 +19,7 @@ import java.util.Set;
 public class AccountDetailsCustom implements UserDetails {
     private Integer id;
     private String name;
+    private String avatar;
     private String email;
     private String password;
     private Integer status;

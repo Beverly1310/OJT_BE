@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -61,8 +63,10 @@ public class APIControllerAdvice {
         return map;
     }
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<?> handleCustomException(CustomException ex) {
-        HttpStatus status = ex.getHttpStatus();
-        return ResponseEntity.status(status).body(new ErrorResponse(status.value(), ex.getMessage(), status.getReasonPhrase()));
+    @ResponseStatus
+    public Map<String, Object> customException(CustomException c) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("error" ,new ResponseError(c.getHttpStatus().value(), c.getHttpStatus().name(),c.getMessage()));
+        return map;
     }
 }
