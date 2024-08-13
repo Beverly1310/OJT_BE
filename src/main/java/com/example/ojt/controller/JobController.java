@@ -18,13 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api.myservice.com/v1/company/job")
 public class JobController {
 
     private final JobService jobService;
-
 
     @GetMapping
     public ResponseEntity<Page<JobResponse>> getJobs(
@@ -85,4 +86,6 @@ public class JobController {
             throw new CustomException("Loi", HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
+
+
 }

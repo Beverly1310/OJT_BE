@@ -11,6 +11,7 @@ import com.example.ojt.repository.*;
 import com.example.ojt.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -47,6 +49,7 @@ public class JobService implements IJobService{
         Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
     }
+
     @Override
     public Page<JobResponse> findAll(Pageable pageable, String search, String location) {
         Page<Job> jobs;
@@ -57,7 +60,6 @@ public class JobService implements IJobService{
         } else {
             jobs = jobRepository.findAllByTitleContainsAndAddressCompany_Location_NameCityContains(search, location, pageable);
         }
-
         return jobs.map(this::convertToJobResponse);
     }
 
@@ -212,4 +214,5 @@ public class JobService implements IJobService{
             throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

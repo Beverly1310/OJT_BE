@@ -10,10 +10,13 @@ import com.example.ojt.model.entity.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface IJobService {
     Page<JobResponse> findAll(Pageable pageable, String search, String location);
     boolean addJob(JobAddRequest jobRequest) throws CustomException;
     boolean updateJob(JobRequest jobRequest) throws CustomException;
     boolean deleteJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
+
 }

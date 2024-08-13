@@ -4,6 +4,7 @@ import com.example.ojt.model.entity.TypeJob;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -25,4 +26,5 @@ public class JobResponse {
     private String city;
     private String companyLogo;
     private Set<String> typeJob;
+
 }
