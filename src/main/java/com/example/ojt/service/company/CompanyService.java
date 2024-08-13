@@ -2,6 +2,7 @@ package com.example.ojt.service.company;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
+import com.example.ojt.model.dto.response.CompanyResponse;
 import com.example.ojt.model.entity.AddressCompany;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.model.entity.Location;
@@ -12,13 +13,18 @@ import com.example.ojt.repository.ITypeCompanyRepository;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +34,59 @@ public class CompanyService implements ICompanyService {
     private final ITypeCompanyRepository typeCompanyRepository;
     private final ILocationRepository locationRepository;
 
+    @Override
+    public Page<CompanyResponse> findAllCompanies(Pageable pageable, String locationName, String companyName) {
+        Page<Company> companies;
+        if ((companyName == null || companyName.isEmpty()) && (locationName == null || locationName.isEmpty())) {
+            companies = companyRepository.findAll(pageable);
+        } else {
+            companies = companyRepository.findAllByCompanyNameAndLocation(
+                    companyName != null ? companyName : "",
+                    locationName != null ? locationName : "",
+                    pageable
+            );
+        }
 
+        return companies.map(this::convertToCompanyResponse);
+    }
+
+    private CompanyResponse convertToCompanyResponse(Company company) {
+        // Giả sử mỗi công ty có ít nhất một địa chỉ, lấy address, mapUrl và nameCity từ địa chỉ đầu tiên.
+        Optional<AddressCompany> firstAddress = company.getAddressCompanySet().stream().findFirst();
+
+        String nameCity = firstAddress.map(addressCompany -> addressCompany.getLocation().getNameCity()).orElse("N/A");
+        String address = firstAddress.map(AddressCompany::getAddress).orElse("N/A");
+        String mapUrl = firstAddress.map(AddressCompany::getMapUrl).orElse("N/A");
+
+        return CompanyResponse.builder()
+                .id(company.getId())
+                .name(company.getName())
+                .logo(company.getLogo())
+                .website(company.getWebsite())
+                .linkFacebook(company.getLinkFacebook())
+                .linkLinkedin(company.getLinkLinkedin())
+                .followers(company.getFollowers())
+                .size(company.getSize())
+                .description(company.getDescription())
+                .phone(company.getPhone())
+                .emailCompany(company.getEmailCompany())
+                .policy(company.getPolicy())
+                .createdAt(company.getCreatedAt())
+                .updatedAt(company.getUpdatedAt())
+                .typeCompanyName(company.getTypeCompany() != null ? company.getTypeCompany().getName() : "N/A")
+                .nameCity(nameCity)
+                .address(address)  // Chỉ cần lấy address một lần
+                .mapUrl(mapUrl)    // Chỉ cần lấy mapUrl một lần
+                .build();
+    }
+
+
+    @Override
+    public CompanyResponse findById(Integer id) throws CustomException {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Company not found with id " + id, HttpStatus.NOT_FOUND));
+        return convertToCompanyResponse(company);
+    }
     @Override
     public boolean update(EditCompanyRequest companyRequest) throws CustomException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
