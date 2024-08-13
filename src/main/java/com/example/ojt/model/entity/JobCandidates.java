@@ -17,6 +17,8 @@ public class JobCandidates {
 
     private int status;
     private String cvUrl;
+    @Column(name = "interview_day", columnDefinition = "VARCHAR(20)")
+    private Date interviewDay;
     private String content;
 
     @ManyToOne

@@ -1,5 +1,6 @@
 package com.example.ojt.model.dto.request;
 
+import com.example.ojt.model.entity.Candidate;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -30,7 +31,7 @@ public class CandidateRequestDTO {
     private String phone;
 
     @NotEmpty(message = "Please fill Gender!")
-    private boolean gender;
+    private String gender;
 
     @NotEmpty(message = "Please fill LinkLinkedin!")
     private String linkLinkedin;

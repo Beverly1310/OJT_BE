@@ -1,7 +1,5 @@
 package com.example.ojt.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,17 +18,15 @@ public class AddressCompany {
 
     private String address;
     private String mapUrl;
-    @Column(name = "created_at")
-    private Date createdAt;
+    @Column(name = "created_at", columnDefinition = "VARCHAR(20)")
+    private String createdAt;
     private int status;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
-
     private Company company;
 
     @ManyToOne
     @JoinColumn(name = "location_id")
-
     private Location location;
 }
