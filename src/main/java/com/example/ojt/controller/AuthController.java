@@ -25,6 +25,13 @@ public class AuthController {
 
     }
 
+
+    /**
+     * đăng kí ứng viên
+     * @param registerAccountCandidate
+     * @return
+     * @throws CustomException
+     */
     @PostMapping("/candidate/sign-up")
     public ResponseEntity<?> doRegister(@Valid @RequestBody RegisterAccount registerAccountCandidate) throws CustomException {
         boolean check = accountService.registerCandidate(registerAccountCandidate);
@@ -140,5 +147,6 @@ public class AuthController {
         }
     }
 }
+
 
 

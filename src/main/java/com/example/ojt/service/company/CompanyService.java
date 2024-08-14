@@ -1,6 +1,7 @@
 package com.example.ojt.service.company;
 
 import com.example.ojt.exception.CustomException;
+import com.example.ojt.exception.IdFormatException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
 import com.example.ojt.model.dto.response.CompanyResponse;
 import com.example.ojt.model.entity.AddressCompany;
@@ -12,10 +13,12 @@ import com.example.ojt.repository.ILocationRepository;
 import com.example.ojt.repository.ITypeCompanyRepository;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -162,4 +166,31 @@ public class CompanyService implements ICompanyService {
         }
         return false;
     }
+
+    @Override
+    public ResponseEntity<Page<Company>> getAllCompanies(Pageable pageable) {
+        Page<Company> companies = companyRepository.findAll(pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(companies);
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteCompany(Integer id) throws IdFormatException {
+        if (id == null || id < 0) {
+            throw new IdFormatException("Invalid ID format");
+        }
+        if (!companyRepository.existsById(id)) {
+            throw new IdFormatException("Company with ID " + id + " does not exist");
+        }
+        companyRepository.deleteById(id);
+    }
+
+
+    // @Override
+    //    public ResponseEntity<Page<UserResponsedto>> findAllUser(Pageable pageable) {
+    //        Page<User> user = userRepository.findAll(pageable);
+    //        Page<UserResponsedto> response = user.map(this::    mapToUserResponse);
+    //        return ResponseEntity.status(HttpStatus.OK).body(response);
+    //    }
 }
