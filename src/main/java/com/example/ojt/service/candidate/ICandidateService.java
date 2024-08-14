@@ -79,4 +79,5 @@ public interface ICandidateService {
 
     UserInfo getInfoByUser();
 
+    List<LevelJob> getLevelJobs();
 }
