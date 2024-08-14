@@ -6,6 +6,7 @@ import com.example.ojt.model.dto.request.JobRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
+import com.example.ojt.model.entity.Job;
 import com.example.ojt.service.job.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api.myservice.com/v1/company/job")
 public class JobController {
 
     private final JobService jobService;
-
 
     @GetMapping
     public ResponseEntity<Page<JobResponse>> getJobs(
@@ -84,5 +86,11 @@ public class JobController {
         }else {
             throw new CustomException("Loi", HttpStatus.UNPROCESSABLE_ENTITY);
         }
+    }
+
+    @GetMapping("/{id}/same-type-jobs")
+    public ResponseEntity<List<Job>> getJobsBySameType(@PathVariable Integer id) {
+        List<Job> jobs = jobService.getJobsBySameType(id);
+        return ResponseEntity.ok(jobs);
     }
 }

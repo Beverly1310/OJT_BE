@@ -10,6 +10,8 @@ import com.example.ojt.model.dto.response.CompanyResponse;
 import org.springframework.data.domain.Page;
 
 
+import java.util.List;
+
 public interface ICompanyService {
     boolean update(EditCompanyRequest companyRequest) throws CustomException;
 
@@ -22,6 +24,8 @@ public interface ICompanyService {
 
     Page<CompanyResponse> findAllCompanies(Pageable pageable, String location, String search);
     CompanyResponse findById(Integer id) throws CustomException;
+
+    List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId);
 
 }
 

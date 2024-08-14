@@ -23,10 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -91,6 +88,28 @@ public class CompanyService implements ICompanyService {
                 .orElseThrow(() -> new CustomException("Company not found with id " + id, HttpStatus.NOT_FOUND));
         return convertToCompanyResponse(company);
     }
+
+    @Override
+    public List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId) {
+        Optional<Company> companyDetail = companyRepository.findById(companyId);
+        if (companyDetail.isPresent()){
+            Company company = companyDetail.get();
+            TypeCompany typeCompany = company.getTypeCompany();
+            if (typeCompany != null){
+                List<Company> companies = companyRepository.findByTypeCompany(typeCompany);
+
+                // Lọc danh sách các công ty để loại trừ công ty hiện tại
+                List<Company> filteredCompanies = companies.stream()
+                        .filter(c -> !c.getId().equals(companyId))
+                        .toList();
+
+                return filteredCompanies.stream().map(this::convertToCompanyResponse).toList();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+
     @Override
     public boolean update(EditCompanyRequest companyRequest) throws CustomException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
