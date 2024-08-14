@@ -79,4 +79,5 @@ public interface ICandidateService {
 
     UserInfo getInfoByUser();
 
+    ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
 }

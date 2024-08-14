@@ -23,5 +23,6 @@ public interface ICompanyService {
     Page<CompanyResponse> findAllCompanies(Pageable pageable, String location, String search);
     CompanyResponse findById(Integer id) throws CustomException;
 
+    ResponseEntity<Integer> changeOutstandingStatus(Integer companyId);
 }
 

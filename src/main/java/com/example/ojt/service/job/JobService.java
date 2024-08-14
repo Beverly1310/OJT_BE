@@ -232,5 +232,4 @@ public class JobService implements IJobService{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
 }
