@@ -13,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -120,9 +122,7 @@ public class JobService implements IJobService{
                         .build();
                 typesJobsRepository.save(typesJobs);
             }
-
             return true;
-
     }
     @Override
     @Transactional
@@ -212,4 +212,25 @@ public class JobService implements IJobService{
             throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @Override
+    public ResponseEntity<?> getAllJobs(Pageable pageable) {
+       Page<Job>  jobs =  jobRepository.findAll(pageable);
+         return ResponseEntity.status(HttpStatus.OK).body(jobs);
+    }
+
+    @Override
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer jobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        if (job.isPresent()) {
+            Job job1 = job.get();
+            job1.setOutstanding(job1.getOutstanding() == 1 ? 0 : 1);
+            jobRepository.save(job1);
+            return ResponseEntity.status(HttpStatus.OK).body((int) job1.getOutstanding());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 }

@@ -9,6 +9,7 @@ import com.example.ojt.model.dto.response.SuccessResponse;
 import com.example.ojt.model.entity.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 public interface IJobService {
     Page<JobResponse> findAll(Pageable pageable, String search, String location);
@@ -16,4 +17,8 @@ public interface IJobService {
     boolean updateJob(JobRequest jobRequest) throws CustomException;
     boolean deleteJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
+
+    ResponseEntity<?> getAllJobs(Pageable pageable);
+
+    ResponseEntity<Integer> changeOutstandingStatus(Integer jobId);
 }
