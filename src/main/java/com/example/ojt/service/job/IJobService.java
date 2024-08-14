@@ -18,5 +18,5 @@ public interface IJobService {
     boolean updateJob(JobRequest jobRequest) throws CustomException;
     boolean deleteJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
-
+    List<Job> getJobsBySameType(Integer jobId);
 }

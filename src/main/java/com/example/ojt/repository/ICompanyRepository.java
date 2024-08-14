@@ -1,6 +1,7 @@
 package com.example.ojt.repository;
 
 import com.example.ojt.model.entity.Company;
+import com.example.ojt.model.entity.TypeCompany;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +25,5 @@ public interface ICompanyRepository extends JpaRepository<Company, Integer> {
     Page<Company> findAllByCompanyNameAndLocation(@Param("companyName") String companyName,
                                                   @Param("locationName") String locationName,
                                                   Pageable pageable);
+    List<Company> findByTypeCompany(TypeCompany typeCompany);
 }

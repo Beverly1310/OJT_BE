@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -214,5 +215,12 @@ public class JobService implements IJobService{
             throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @Override
+    public List<Job> getJobsBySameType(Integer jobId) {
+        // Tìm tất cả các loại công việc liên quan đến công việc
+        Set<String> typeNames = typesJobsRepository.findTypeNamesByJobId(jobId);
 
+        // Tìm tất cả các công việc có cùng loại
+        return jobRepository.findByTypesJobs_NameIn(typeNames);
+    }
 }

@@ -6,6 +6,7 @@ import com.example.ojt.model.dto.request.JobRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.dto.response.SuccessResponse;
+import com.example.ojt.model.entity.Job;
 import com.example.ojt.service.job.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -87,5 +88,9 @@ public class JobController {
         }
     }
 
-
+    @GetMapping("/{id}/same-type-jobs")
+    public ResponseEntity<List<Job>> getJobsBySameType(@PathVariable Integer id) {
+        List<Job> jobs = jobService.getJobsBySameType(id);
+        return ResponseEntity.ok(jobs);
+    }
 }
