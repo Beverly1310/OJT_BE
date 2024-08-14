@@ -27,6 +27,18 @@ import java.util.List;
 public class JobController {
 
     private final JobService jobService;
+    @GetMapping("/company")
+    public ResponseEntity<Page<JobResponse>> getAllJobsByCompany(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            Pageable pageable) {
+        try {
+            Page<JobResponse> jobResponses = jobService.findAllByCurrentCompany(title, location, pageable);
+            return new ResponseEntity<>(jobResponses, HttpStatus.OK);
+        } catch (CustomException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @GetMapping
     public ResponseEntity<Page<JobResponse>> getJobs(
@@ -39,6 +51,7 @@ public class JobController {
                 Sort.by(Sort.Direction.fromString(direction), sort));
         return ResponseEntity.ok().body(jobService.findAll(sortPageable, search, location));
     }
+
     @PostMapping
     public ResponseEntity<?> addJob(@Valid @RequestBody JobAddRequest jobRequest) {
         try {
