@@ -24,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api.myservice.com/v1/candidate")
 @RequiredArgsConstructor
@@ -272,5 +274,11 @@ public class CandidateController {
        UserInfo userInfo = candidateService.getInfoByUser();
        APIResponse response = new APIResponse(200, "Get info success");
        return new ResponseEntity<>(new DataResponse<>(response, userInfo), HttpStatus.OK);
+   }
+   @GetMapping("/getlvjob")
+    public  ResponseEntity<?> getLvJob() {
+       List<LevelJob> levelJobs = candidateService.getLevelJobs();
+       APIResponse response = new APIResponse(200, "Get level job success");
+       return new ResponseEntity<>(new DataResponse<>(response, levelJobs), HttpStatus.OK);
    }
 }

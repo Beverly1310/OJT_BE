@@ -13,7 +13,5 @@ import lombok.Setter;
 @Setter
 public class AddSkillCandidateReq {
     private String name;
-    @NotNull(message = "Level job must not be empty")
-    @NotBlank(message = "Level job must not be empty")
-    private String levelJobName;
+    private Integer levelJobId;
 }

@@ -414,7 +414,7 @@ public class CandidateService implements ICandidateService {
         SkillsCandidate skillsCandidate = SkillsCandidate.builder()
                 .name(addSkillCandidateReq.getName())
                 .candidate(getCurrentCandidate())
-                .levelJob(levelJobRepository.findByName(addSkillCandidateReq.getLevelJobName()).orElseThrow(() -> new CustomException("Level Job not found", HttpStatus.NOT_FOUND)))
+                .levelJob(levelJobRepository.findById(addSkillCandidateReq.getLevelJobId()).orElseThrow(() -> new CustomException("Level Job not found", HttpStatus.NOT_FOUND)))
                 .build();
         skillCandidateRepository.save(skillsCandidate);
         return true;
@@ -583,4 +583,11 @@ public class CandidateService implements ICandidateService {
                 .skillsCandidates(skillCandidateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
                 .build();
     }
+
+    @Override
+    public List<LevelJob> getLevelJobs() {
+        return levelJobRepository.findAll();
+    }
 }
+
+
