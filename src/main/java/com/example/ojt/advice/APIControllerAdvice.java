@@ -3,6 +3,7 @@ package com.example.ojt.advice;
 import com.example.ojt.exception.*;
 import com.example.ojt.model.dto.response.ErrorResponse;
 import com.example.ojt.model.dto.response.ResponseError;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -68,5 +69,22 @@ public class APIControllerAdvice {
         Map<String, Object> map = new HashMap<>();
         map.put("error" ,new ResponseError(c.getHttpStatus().value(), c.getHttpStatus().name(),c.getMessage()));
         return map;
+    }
+
+    @ExceptionHandler(InvalidFormatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,ResponseError> badIdFormat(InvalidFormatException e) {
+        Map<String, ResponseError> map = new HashMap<>();
+        map.put("error", new ResponseError(400, "ID_FORMAT", e.getMessage()));
+        return  map;
+    }
+
+    @ExceptionHandler(IdFormatException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,ResponseError> badIdFormat(IdFormatException e) {
+
+        Map<String, ResponseError> map = new HashMap<>();
+        map.put("error", new ResponseError(400, "ID_FORMAT", e.getMessage()));
+        return  map;
     }
 }

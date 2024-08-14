@@ -137,6 +137,7 @@ public class AccountService implements IAccountService {
 
     }
 
+
     @Override
     @Transactional
     public boolean registerCandidate(RegisterAccount registerAccountCandidate) throws CustomException {

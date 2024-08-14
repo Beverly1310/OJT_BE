@@ -221,6 +221,8 @@ public class CandidateController {
            throw new CustomException("Delete project fail", HttpStatus.BAD_REQUEST);
        }
    }
+
+
    @PostMapping("/skill")
     public ResponseEntity<?> addSkill(@Valid@RequestBody AddSkillCandidateReq addSkillCandidateReq) throws CustomException{
        boolean check = candidateService.addSkill(addSkillCandidateReq);

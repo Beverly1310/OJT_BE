@@ -11,6 +11,9 @@ import com.example.ojt.model.dto.response.CandidateBasicInfoResponse;
 import com.example.ojt.model.entity.EducationCandidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public interface ICandidateService {
     boolean addEducation(EduCandidateAddReq eduCandidateAddReq) throws CustomException;
@@ -69,5 +72,11 @@ public interface ICandidateService {
 
     CandidateBasicInfoResponse getBasicInfo(Integer candidateId) throws CustomException;
 
+
+    Page<CandidateEmailDTO> getAllCandidatesWithEmail(Pageable pageable, String search);
+
+    ResponseEntity<Integer> changaStatus(Integer candidateId);
+
     UserInfo getInfoByUser();
+
 }

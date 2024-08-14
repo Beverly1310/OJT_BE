@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,8 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -531,6 +533,44 @@ public class CandidateService implements ICandidateService {
         response.setLinkGit(candidate.getLinkGit());
         return response;
     }
+
+
+
+    @Override
+    public Page<CandidateEmailDTO> getAllCandidatesWithEmail(Pageable pageable, String search) {
+        // Search for candidates by name or account email
+        return candidateRepository.findByNameContainingOrAccountEmailContaining(search, search, pageable)
+                .map(candidate -> new CandidateEmailDTO(
+                        candidate.getId(),
+                        candidate.getName(),
+                        candidate.getAccount() != null ? candidate.getAccount().getEmail() : null,
+                        candidate.getBirthday(),
+                        candidate.getAddress(),
+                        candidate.getPhone(),
+                        candidate.getStatus(),
+                        candidate.getGender(),
+                        candidate.getLinkLinkedin(),
+                        candidate.getLinkGit(),
+                        candidate.getPosition()
+                ));
+    }
+
+
+
+    @Override
+        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
+            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+
+            if (candidateOptional.isPresent()) {
+                Candidate candidate = candidateOptional.get();
+                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
+                candidateRepository.save(candidate);
+                return ResponseEntity.ok(candidate.getStatus());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        }
+
 
     @Override
     public UserInfo getInfoByUser() {
