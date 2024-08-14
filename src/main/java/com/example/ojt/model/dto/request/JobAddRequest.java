@@ -28,8 +28,9 @@ public class JobAddRequest {
     @NotNull(message = "Expire date must not be empty")
     @NotBlank(message = "Expire date must not be empty")
     private String expireAt;
-    @NotNull(message = "Company must not be empty")
+    @NotNull(message = "Company ID must not be empty")
     private Integer companyId;
+
     @NotNull(message = "Address must not be empty")
     private Integer addressCompanyId;
     @NotNull(message = "Level must not be empty")

@@ -64,6 +64,16 @@ public class JobService implements IJobService{
         return jobs.map(this::convertToJobResponse);
     }
 
+
+    // Phương thức mới để lấy danh sách các Job theo Company
+    @Override
+    @Transactional(readOnly = true)
+    public Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException {
+        Company company = getCurrentCompany(); // Phương thức lấy thông tin công ty hiện tại
+        Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
+        return jobs.map(this::convertToJobResponse); // Chuyển đổi Job entity sang JobResponse
+    }
+
     private JobResponse convertToJobResponse(Job job) {
         return JobResponse.builder()
                 .id(job.getId())
@@ -85,48 +95,51 @@ public class JobService implements IJobService{
     @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
+        Company company = getCurrentCompany(); // Lấy company từ tài khoản hiện tại
 
-
-            AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
-                    .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
-            if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null)!=null){
-                throw  new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
-            }
-            Job job = Job.builder()
-                    .title(jobRequest.getTitle())
-                    .description(jobRequest.getDescription())
-                    .requirements(jobRequest.getRequirements())
-                    .salary(jobRequest.getSalary())
-                    .expireAt(jobRequest.getExpireAt())
-                    .createdAt(new Timestamp(new Date().getTime()))
-                    .status(1)
-                    .company(getCurrentCompany())
-                    .addressCompany(addressCompany)
-                    .build();
+        AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
+                .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
+        if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null) != null) {
+            throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+        }
+        Job job = Job.builder()
+                .title(jobRequest.getTitle())
+                .description(jobRequest.getDescription())
+                .requirements(jobRequest.getRequirements())
+                .salary(jobRequest.getSalary())
+                .expireAt(jobRequest.getExpireAt())
+                .createdAt(new Timestamp(new Date().getTime()))
+                .status(1)
+                .company(company) // Liên kết với company hiện tại
+                .addressCompany(addressCompany)
+                .build();
         jobRepository.save(job);
 
+        // Liên kết với các LevelJob
+        List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
+        for (LevelJob levelJob : levelJobs) {
+            LevelsJobs levelsJobs = LevelsJobs.builder()
+                    .job(job)
+                    .levelJob(levelJob)
+                    .build();
+            levelsJobsRepository.save(levelsJobs);
+        }
 
-            List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
-            for (LevelJob levelJob : levelJobs) {
-                LevelsJobs levelsJobs = LevelsJobs.builder()
-                        .job(job)
-                        .levelJob(levelJob)
-                        .build();
-                levelsJobsRepository.save(levelsJobs);
-            }
+        // Liên kết với các TypeJob
+        List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
+        for (TypeJob typeJob : typeJobs) {
+            TypesJobs typesJobs = TypesJobs.builder()
+                    .job(job)
+                    .typeJob(typeJob)
+                    .build();
+            typesJobsRepository.save(typesJobs);
+        }
 
-            List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
-            for (TypeJob typeJob : typeJobs) {
-                TypesJobs typesJobs = TypesJobs.builder()
-                        .job(job)
-                        .typeJob(typeJob)
-                        .build();
-                typesJobsRepository.save(typesJobs);
-            }
-
-            return true;
-
+        return true;
     }
+
+
+
     @Override
     @Transactional
     public boolean updateJob(JobRequest jobRequest) throws CustomException {

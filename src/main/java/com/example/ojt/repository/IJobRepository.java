@@ -22,4 +22,14 @@ Optional<Job> findByIdAndCompany(Integer id, Company company);
 
     @Query("SELECT j FROM Job j JOIN TypesJobs tj ON j.id = tj.job.id WHERE tj.typeJob.name IN :typeNames")
     List<Job> findByTypesJobs_NameIn(@Param("typeNames") Set<String> typeNames);
+
+    @Query("SELECT j FROM Job j " +
+            "WHERE j.company = :company " +
+            "AND (:title IS NULL OR j.title LIKE %:title%) " +
+            "AND (:location IS NULL OR j.addressCompany.location.nameCity LIKE %:location%)")
+    Page<Job> findAllByCompanyAndTitleContainingAndLocationContaining(
+            @Param("company") Company company,
+            @Param("title") String title,
+            @Param("location") String location,
+            Pageable pageable);
 }

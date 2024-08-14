@@ -19,4 +19,5 @@ public interface IJobService {
     boolean deleteJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
     List<Job> getJobsBySameType(Integer jobId);
+    Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException;
 }
