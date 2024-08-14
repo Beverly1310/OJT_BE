@@ -22,7 +22,7 @@ public class UpdateAccountCandidate {
     private String linkGit;
     private String linkLinkedin;
     private String name;
-    @Pattern(regexp = "^(\\+84|0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$" )
+    @Pattern(regexp = "^(\\+84|0)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$", message = "Phone number invalid")
     private String phone;
     private String position;
 }
