@@ -14,12 +14,13 @@ public class CVResponse
 {
     String name;
     String about;
-    List<ExperienceCVResponse> experiences;
+    List<ExperienceCVResponse> experience;
     Integer age;
     String address;
     List<SkillCVResponse> skills;
     List<CertificateCVResponse> certificates;
     List<ProjectCVResponse> projects;
+    List<EducationCVResponse> educations;
     String phone;
     Boolean gender;
     String linkLinkedin;

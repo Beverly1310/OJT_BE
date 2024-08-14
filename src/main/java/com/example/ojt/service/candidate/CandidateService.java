@@ -505,7 +505,7 @@ public class CandidateService implements ICandidateService {
         for (ExperienceCandidate experience : experiences) {
             experienceCVResponses.add(new ExperienceCVResponse(experience.getPosition(), experience.getCompany(), experience.getStartAt(), experience.getEndAt(), experience.getInfo()));
         }
-        response.setExperiences(experienceCVResponses);
+        response.setExperience(experienceCVResponses);
 //        Dự án
         List<ProjectCandidate> projects = projectRepository.findAllByCandidateId(candidateId);
         List<ProjectCVResponse> projectCVResponses = new ArrayList<>();
@@ -513,6 +513,13 @@ public class CandidateService implements ICandidateService {
             projectCVResponses.add(new ProjectCVResponse(projectCandidate.getName(), projectCandidate.getLink(), projectCandidate.getStartAt(), projectCandidate.getEndAt(), projectCandidate.getInfo()));
         }
         response.setProjects(projectCVResponses);
+//        Học vấn
+        List<EducationCandidate> educations=educationCandidateRepository.findAllByCandidateId(candidateId);
+        List<EducationCVResponse> educationCVResponses=new ArrayList<>();
+        for (EducationCandidate education:educations){
+            educationCVResponses.add(new EducationCVResponse(education.getNameEducation(),education.getMajor(),education.getStartAt(),education.getEndAt(),education.getInfo()));
+        }
+        response.setEducations(educationCVResponses);
         return response;
     }
 
@@ -531,6 +538,19 @@ public class CandidateService implements ICandidateService {
         response.setGender(candidate.getGender());
         response.setLinkLinkedin(candidate.getLinkLinkedin());
         response.setLinkGit(candidate.getLinkGit());
+        response.setPosition(candidate.getPosition());
+        List<ExperienceCVResponse> experienceCVResponses = new ArrayList<>();
+        List<ExperienceCandidate> experiences = experienceRepository.findAllByCandidateId(candidateId);
+        for (ExperienceCandidate experience : experiences) {
+            experienceCVResponses.add(new ExperienceCVResponse(experience.getPosition(), experience.getCompany(), experience.getStartAt(), experience.getEndAt(), experience.getInfo()));
+        }
+        response.setExperience(experienceCVResponses);
+        List<SkillsCandidate> skills = skillCandidateRepository.findAllByCandidateId(candidateId);
+        List<String> skillList = new ArrayList<>();
+        for (SkillsCandidate skill : skills) {
+            skillList.add(skill.getName());
+        }
+        response.setSkills(skillList);
         return response;
     }
 
