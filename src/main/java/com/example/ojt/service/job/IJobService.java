@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface IJobService {
     Page<JobResponse> findAll(Pageable pageable, String search, String location);
     boolean addJob(JobAddRequest jobRequest) throws CustomException;
@@ -18,7 +20,12 @@ public interface IJobService {
     boolean deleteJob(Integer deleteId) throws CustomException;
     SuccessResponse findById(Integer findId) throws CustomException;
 
+
     ResponseEntity<?> getAllJobs(Pageable pageable);
 
     ResponseEntity<Integer> changeOutstandingStatus(Integer jobId);
+
+    List<Job> getJobsBySameType(Integer jobId);
+    Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException;
+
 }

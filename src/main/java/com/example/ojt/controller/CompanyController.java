@@ -16,6 +16,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api.myservice.com/v1/company")
 @RequiredArgsConstructor
@@ -56,6 +58,14 @@ public class CompanyController {
         Page<CompanyResponse> companies = companyService.findAllCompanies(sortedPageable, location, name);
         return ResponseEntity.ok().body(companies);
     }
+
+    @GetMapping("/{companyId}/related-companies")
+    public ResponseEntity<List<CompanyResponse>> getRelatedCompanies(@PathVariable Integer companyId) {
+        List<CompanyResponse> relatedCompanies = companyService.findCompaniesByTypeCompany(companyId);
+        return ResponseEntity.ok(relatedCompanies);
+    }
+
+
     @GetMapping("/{companyId}")
     public ResponseEntity<?> findCompanyById(@PathVariable Integer companyId) {
         try {
@@ -66,13 +76,5 @@ public class CompanyController {
         }
     }
 
-    @GetMapping("/viewCandidateCV/{candidateId}")
-    public ResponseEntity<?> viewCandidateCV(@PathVariable Integer candidateId) throws CustomException{
-        return ResponseEntity.ok(candidateService.getCandidateCV(candidateId));
-    }
 
-    @GetMapping("viewCandidateInfo/{candidateId}")
-    public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
-        return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
-    }
 }

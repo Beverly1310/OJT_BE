@@ -30,6 +30,7 @@ public class Company {
     private String description;
     private String phone;
     private String emailCompany;
+    @Column(columnDefinition = "LONGTEXT")
     private String policy;
     private Date createdAt;
     private Date updatedAt;
