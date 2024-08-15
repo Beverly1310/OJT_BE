@@ -51,6 +51,9 @@ public class JobService implements IJobService{
     @Autowired
     private ITypesJobsRepository typesJobsRepository;
 
+    @Autowired
+    private ILocationRepository locationRepository;
+
     private  Company getCurrentCompany() throws CustomException {
         Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
@@ -97,16 +100,22 @@ public class JobService implements IJobService{
                 .build();
     }
 
-    @Override
+
+   @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
-        Company company = getCurrentCompany(); // Lấy company từ tài khoản hiện tại
+        Company company = getCurrentCompany(); // Get the current company from the account
 
-        AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
+        Location location = locationRepository.findById(jobRequest.getLocationId())
+                .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
+
+        AddressCompany addressCompany = addressCompanyRepository.findByLocation(location)
                 .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
+
         if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null) != null) {
-            throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Job already exists", HttpStatus.BAD_REQUEST);
         }
+
         Job job = Job.builder()
                 .title(jobRequest.getTitle())
                 .description(jobRequest.getDescription())
@@ -115,12 +124,13 @@ public class JobService implements IJobService{
                 .expireAt(jobRequest.getExpireAt())
                 .createdAt(new Timestamp(new Date().getTime()))
                 .status(1)
-                .company(company) // Liên kết với company hiện tại
+                .company(company) // Link with the current company
                 .addressCompany(addressCompany)
                 .build();
+
         jobRepository.save(job);
 
-        // Liên kết với các LevelJob
+        // Link with LevelJobs
         List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
         for (LevelJob levelJob : levelJobs) {
             LevelsJobs levelsJobs = LevelsJobs.builder()
@@ -130,18 +140,19 @@ public class JobService implements IJobService{
             levelsJobsRepository.save(levelsJobs);
         }
 
+        // Link with TypeJobs
+        List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
+        for (TypeJob typeJob : typeJobs) {
+            TypesJobs typesJobs = TypesJobs.builder()
+                    .job(job)
+                    .typeJob(typeJob)
+                    .build();
+            typesJobsRepository.save(typesJobs);
+        }
 
-
-            List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
-            for (TypeJob typeJob : typeJobs) {
-                TypesJobs typesJobs = TypesJobs.builder()
-                        .job(job)
-                        .typeJob(typeJob)
-                        .build();
-                typesJobsRepository.save(typesJobs);
-            }
-            return true;
+        return true;
     }
+
 
 
 
