@@ -22,7 +22,6 @@ public class SkillsCandidate {
     @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "leveljob_id")
     private LevelJob levelJob;

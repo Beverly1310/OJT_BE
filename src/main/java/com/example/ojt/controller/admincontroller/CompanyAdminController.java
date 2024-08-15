@@ -15,14 +15,37 @@ public class CompanyAdminController {
     @Autowired
     private ICompanyService companyService;
 
+    /**
+     * lấy ds công ty
+     * @param pageable
+     * @return
+     */
     @GetMapping("/companies")
     public ResponseEntity<?> findAllCompany(@PageableDefault Pageable pageable) {
         return companyService.getAllCompanies(pageable);
     }
 
+
+    /**
+     * xoa công ty
+     * @param companyId
+     * @return
+     * @throws IdFormatException
+     */
     @DeleteMapping("/companies/{companyId}")
     public ResponseEntity<Void> deleteCompany(@PathVariable Integer companyId) throws IdFormatException {
         companyService.deleteCompany(companyId);
         return ResponseEntity.noContent().build();
+    }
+
+
+    /**
+     * công ty nổi bật
+     * @param companyId
+     * @return
+     */
+    @PatchMapping("/companies/{companyId}")
+    public ResponseEntity<Integer> changeOutstandingStatus(@PathVariable Integer companyId){
+        return companyService.changeOutstandingStatus(companyId);
     }
 }

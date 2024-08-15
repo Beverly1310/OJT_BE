@@ -30,6 +30,7 @@ public class Candidate {
     private String linkGit;
     @Column(name = "position", columnDefinition = "VARCHAR(100)")
     private String position;
+    private Integer Outstanding;
     private Date createdAt;
     private Date updatedAt;
     @Column(columnDefinition = "LONGTEXT")
