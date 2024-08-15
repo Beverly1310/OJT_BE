@@ -25,6 +25,7 @@ public class Company {
     private String linkLinkedin;
     private Integer followers;
     private Integer size;
+    private Integer Outstanding;
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     private String phone;
