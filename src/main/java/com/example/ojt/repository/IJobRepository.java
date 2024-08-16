@@ -32,4 +32,6 @@ Optional<Job> findByIdAndCompany(Integer id, Company company);
             @Param("title") String title,
             @Param("location") String location,
             Pageable pageable);
+
+    Page<Job> findAllByCompany(Company company , Pageable pageable);
 }

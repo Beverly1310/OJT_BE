@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 @Component
+@Slf4j
 public class JWTAuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private AccountDetailsServiceCustom detailsServiceCustom;
@@ -39,6 +41,7 @@ public class JWTAuthTokenFilter extends OncePerRequestFilter {
     private String getTokenFromRequest(HttpServletRequest request){
         // lấy ra chuỗi bearer token
         String bearer = request.getHeader("Authorization");
+        log.info("Bear"+bearer);
         if (bearer!=null && bearer.startsWith("Bearer ")){
             return bearer.substring("Bearer ".length());
         }
