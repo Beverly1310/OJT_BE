@@ -20,4 +20,6 @@ public interface IJobService {
     SuccessResponse findById(Integer findId) throws CustomException;
     List<Job> getJobsBySameType(Integer jobId);
     Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException;
+    Page<JobResponse> findAllByCompanyAndSearch(Integer companyId, String title, String location, Pageable pageable) throws CustomException;
+
 }

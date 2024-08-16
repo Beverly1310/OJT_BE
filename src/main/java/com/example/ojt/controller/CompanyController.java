@@ -42,6 +42,15 @@ public class CompanyController {
         }
     }
 
+    @GetMapping("/detail")
+    public ResponseEntity<?> findCurrentCompany() {
+        try {
+            CompanyResponse companyResponse = companyService.findCurrentCompany();
+            return ResponseEntity.ok().body(companyResponse);
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+        }
+    }
     @GetMapping
     public ResponseEntity<Page<CompanyResponse>> findAllCompanies(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,

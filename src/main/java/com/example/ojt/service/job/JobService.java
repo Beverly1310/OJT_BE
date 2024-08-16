@@ -49,6 +49,9 @@ public class JobService implements IJobService{
     @Autowired
     private ILocationRepository locationRepository;
 
+    @Autowired
+    private ICandidateRepository candidateRepository;
+
     private  Company getCurrentCompany() throws CustomException {
         Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
@@ -72,9 +75,9 @@ public class JobService implements IJobService{
     @Override
     @Transactional(readOnly = true)
     public Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException {
-        Company company = getCurrentCompany(); // Phương thức lấy thông tin công ty hiện tại
+        Company company = getCurrentCompany();
         Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
-        return jobs.map(this::convertToJobResponse); // Chuyển đổi Job entity sang JobResponse
+        return jobs.map(this::convertToJobResponse);
     }
 
     private JobResponse convertToJobResponse(Job job) {
@@ -99,7 +102,7 @@ public class JobService implements IJobService{
     @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
-        Company company = getCurrentCompany(); // Get the current company from the account
+        Company company = getCurrentCompany();
 
         Location location = locationRepository.findById(jobRequest.getLocationId())
                 .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
@@ -119,7 +122,7 @@ public class JobService implements IJobService{
                 .expireAt(jobRequest.getExpireAt())
                 .createdAt(new Timestamp(new Date().getTime()))
                 .status(1)
-                .company(company) // Link with the current company
+                .company(company)
                 .addressCompany(addressCompany)
                 .build();
 
@@ -248,4 +251,20 @@ public class JobService implements IJobService{
         // Tìm tất cả các công việc có cùng loại
         return jobRepository.findByTypesJobs_NameIn(typeNames);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<JobResponse> findAllByCompanyAndSearch(Integer companyId, String title, String location, Pageable pageable) throws CustomException {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new CustomException("Company not found with id: " + companyId,HttpStatus.NOT_FOUND));
+
+
+        Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
+
+
+        return jobs.map(this::convertToJobResponse);
+    }
+
 }
