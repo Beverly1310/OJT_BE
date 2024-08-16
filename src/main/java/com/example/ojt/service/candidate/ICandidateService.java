@@ -79,4 +79,8 @@ public interface ICandidateService {
 
     UserInfo getInfoByUser();
 
+
+    ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
+
+    List<LevelJob> getLevelJobs();
 }

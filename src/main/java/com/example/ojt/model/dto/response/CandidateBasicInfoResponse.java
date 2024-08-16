@@ -3,6 +3,8 @@ package com.example.ojt.model.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -16,6 +18,8 @@ public class CandidateBasicInfoResponse {
     String address;
     String phone;
     Boolean gender;
+    List<ExperienceCVResponse> experience;
+    List<String> skills;
     String linkLinkedin;
     String linkGit;
     String position;

@@ -14,14 +14,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+
+import java.util.Optional;
+
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -99,7 +104,7 @@ public class JobService implements IJobService{
     }
 
 
-    @Override
+   @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
         Company company = getCurrentCompany();
@@ -150,7 +155,6 @@ public class JobService implements IJobService{
 
         return true;
     }
-
 
 
 
@@ -243,6 +247,27 @@ public class JobService implements IJobService{
             throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+    @Override
+    public ResponseEntity<?> getAllJobs(Pageable pageable) {
+       Page<Job>  jobs =  jobRepository.findAll(pageable);
+         return ResponseEntity.status(HttpStatus.OK).body(jobs);
+    }
+
+    @Override
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer jobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        if (job.isPresent()) {
+            Job job1 = job.get();
+            job1.setOutstanding(job1.getOutstanding() == 1 ? 0 : 1);
+            jobRepository.save(job1);
+            return ResponseEntity.status(HttpStatus.OK).body((int) job1.getOutstanding());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
     @Override
     public List<Job> getJobsBySameType(Integer jobId) {
         // Tìm tất cả các loại công việc liên quan đến công việc
@@ -250,6 +275,7 @@ public class JobService implements IJobService{
 
         // Tìm tất cả các công việc có cùng loại
         return jobRepository.findByTypesJobs_NameIn(typeNames);
+
     }
 
 
