@@ -81,6 +81,9 @@ public interface ICandidateService {
 
     UserInfo getInfoByUser();
 
+
+    ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
+
     List<LevelJob> getLevelJobs();
     void uploadCV(MultipartFile file) throws CustomException;
     List<CVResponse> findAllByCurrentCandidate();

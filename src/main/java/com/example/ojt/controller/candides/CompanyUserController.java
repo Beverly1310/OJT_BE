@@ -1,12 +1,12 @@
-package com.example.ojt.controller;
+package com.example.ojt.controller.candides;
 
 import com.example.ojt.exception.CustomException;
-import com.example.ojt.model.dto.request.EditCompanyRequest;
 import com.example.ojt.model.dto.response.CompanyResponse;
-import com.example.ojt.model.entity.Company;
+import com.example.ojt.model.dto.response.JobResponse;
+import com.example.ojt.repository.IJobRepository;
 import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
-import jakarta.validation.Valid;
+import com.example.ojt.service.job.IJobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,38 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api.myservice.com/v1/company")
+@RequestMapping("/api.myservice.com/v1/candidate/company")
 @RequiredArgsConstructor
-public class CompanyController {
+public class CompanyUserController {
     private final ICompanyService companyService;
-    private final ICandidateService candidateService;
-
-    @PutMapping("/update")
-    public ResponseEntity<?> updateCompany(
-            @ModelAttribute @Valid EditCompanyRequest companyRequest) {
-        try {
-            boolean isUpdated = companyService.update(companyRequest);
-            if (isUpdated) {
-                return ResponseEntity.ok("Company updated successfully");
-            } else {
-                return ResponseEntity.status(404).body("Company not found");
-            }
-        } catch (CustomException e) {
-            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Lỗi ko mong muốn");
-        }
-    }
-
-    @GetMapping("/detail")
-    public ResponseEntity<?> findCurrentCompany() {
-        try {
-            CompanyResponse companyResponse = companyService.findCurrentCompany();
-            return ResponseEntity.ok().body(companyResponse);
-        } catch (CustomException e) {
-            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
-        }
-    }
+    private final IJobService jobService;
     @GetMapping
     public ResponseEntity<Page<CompanyResponse>> findAllCompanies(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
@@ -68,12 +41,6 @@ public class CompanyController {
         return ResponseEntity.ok().body(companies);
     }
 
-    @GetMapping("/{companyId}/related-companies")
-    public ResponseEntity<List<CompanyResponse>> getRelatedCompanies(@PathVariable Integer companyId) {
-        List<CompanyResponse> relatedCompanies = companyService.findCompaniesByTypeCompany(companyId);
-        return ResponseEntity.ok(relatedCompanies);
-    }
-
 
     @GetMapping("/{companyId}")
     public ResponseEntity<?> findCompanyById(@PathVariable Integer companyId) {
@@ -82,6 +49,28 @@ public class CompanyController {
             return ResponseEntity.ok().body(companyResponse);
         } catch (CustomException e) {
             return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+        }
+    }
+
+
+
+    @GetMapping("/{companyId}/related-companies")
+    public ResponseEntity<List<CompanyResponse>> getRelatedCompanies(@PathVariable Integer companyId) {
+        List<CompanyResponse> relatedCompanies = companyService.findCompaniesByTypeCompany(companyId);
+        return ResponseEntity.ok(relatedCompanies);
+    }
+
+    @GetMapping("/{companyId}/jobs")
+    public ResponseEntity<Page<JobResponse>> getAllJobsByCompany(
+            @PathVariable Integer companyId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            Pageable pageable) {
+        try {
+            Page<JobResponse> jobs = jobService.findAllByCompanyAndSearch(companyId, title, location, pageable);
+            return ResponseEntity.ok(jobs);
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(null);
         }
     }
 

@@ -20,10 +20,13 @@ public interface ICompanyService {
 
     void deleteCompany(Integer id) throws IdFormatException;
 
-
+    CompanyResponse findCurrentCompany() throws CustomException;
 
     Page<CompanyResponse> findAllCompanies(Pageable pageable, String location, String search);
     CompanyResponse findById(Integer id) throws CustomException;
+
+
+    ResponseEntity<Integer> changeOutstandingStatus(Integer companyId);
 
     List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId);
 

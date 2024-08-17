@@ -13,6 +13,7 @@ import com.example.ojt.repository.ILocationRepository;
 import com.example.ojt.repository.ITypeCompanyRepository;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
+import com.example.ojt.service.account.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,15 @@ public class CompanyService implements ICompanyService {
     private final UploadService uploadService;
     private final ITypeCompanyRepository typeCompanyRepository;
     private final ILocationRepository locationRepository;
-
+    private  Company getCurrentCompany() throws CustomException {
+        Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
+        return company;
+    }
+    @Override
+    public CompanyResponse findCurrentCompany() throws CustomException {
+        Company company = getCurrentCompany();
+        return convertToCompanyResponse(company);
+    }
     @Override
     public Page<CompanyResponse> findAllCompanies(Pageable pageable, String locationName, String companyName) {
         Page<Company> companies;
@@ -88,6 +97,7 @@ public class CompanyService implements ICompanyService {
                 .orElseThrow(() -> new CustomException("Company not found with id " + id, HttpStatus.NOT_FOUND));
         return convertToCompanyResponse(company);
     }
+
 
     @Override
     public List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId) {
@@ -203,6 +213,19 @@ public class CompanyService implements ICompanyService {
             throw new IdFormatException("Company with ID " + id + " does not exist");
         }
         companyRepository.deleteById(id);
+    }
+
+
+    @Override
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer companyId) {
+        Optional<Company> company = companyRepository.findById(companyId);
+        if (company.isPresent()) {
+            Company company1 = company.get();
+            company1.setOutstanding(company1.getOutstanding() == 1 ? 0 : 1);
+            companyRepository.save(company1);
+            return ResponseEntity.status(HttpStatus.OK).body(company1.getOutstanding());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
 

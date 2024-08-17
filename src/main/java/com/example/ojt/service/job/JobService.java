@@ -14,14 +14,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+
+import java.util.Optional;
+
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -46,6 +51,12 @@ public class JobService implements IJobService{
     @Autowired
     private ITypesJobsRepository typesJobsRepository;
 
+    @Autowired
+    private ILocationRepository locationRepository;
+
+    @Autowired
+    private ICandidateRepository candidateRepository;
+
     private  Company getCurrentCompany() throws CustomException {
         Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
@@ -69,9 +80,9 @@ public class JobService implements IJobService{
     @Override
     @Transactional(readOnly = true)
     public Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException {
-        Company company = getCurrentCompany(); // Phương thức lấy thông tin công ty hiện tại
+        Company company = getCurrentCompany();
         Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
-        return jobs.map(this::convertToJobResponse); // Chuyển đổi Job entity sang JobResponse
+        return jobs.map(this::convertToJobResponse);
     }
 
     private JobResponse convertToJobResponse(Job job) {
@@ -92,16 +103,22 @@ public class JobService implements IJobService{
                 .build();
     }
 
-    @Override
+
+   @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
-        Company company = getCurrentCompany(); // Lấy company từ tài khoản hiện tại
+        Company company = getCurrentCompany();
 
-        AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
+        Location location = locationRepository.findById(jobRequest.getLocationId())
+                .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
+
+        AddressCompany addressCompany = addressCompanyRepository.findByLocation(location)
                 .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
+
         if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null) != null) {
-            throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Job already exists", HttpStatus.BAD_REQUEST);
         }
+
         Job job = Job.builder()
                 .title(jobRequest.getTitle())
                 .description(jobRequest.getDescription())
@@ -110,12 +127,13 @@ public class JobService implements IJobService{
                 .expireAt(jobRequest.getExpireAt())
                 .createdAt(new Timestamp(new Date().getTime()))
                 .status(1)
-                .company(company) // Liên kết với company hiện tại
+                .company(company)
                 .addressCompany(addressCompany)
                 .build();
+
         jobRepository.save(job);
 
-        // Liên kết với các LevelJob
+        // Link with LevelJobs
         List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
         for (LevelJob levelJob : levelJobs) {
             LevelsJobs levelsJobs = LevelsJobs.builder()
@@ -125,7 +143,7 @@ public class JobService implements IJobService{
             levelsJobsRepository.save(levelsJobs);
         }
 
-        // Liên kết với các TypeJob
+        // Link with TypeJobs
         List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
         for (TypeJob typeJob : typeJobs) {
             TypesJobs typesJobs = TypesJobs.builder()
@@ -137,6 +155,7 @@ public class JobService implements IJobService{
 
         return true;
     }
+
 
 
 
@@ -228,6 +247,27 @@ public class JobService implements IJobService{
             throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+    @Override
+    public ResponseEntity<?> getAllJobs(Pageable pageable) {
+       Page<Job>  jobs =  jobRepository.findAll(pageable);
+         return ResponseEntity.status(HttpStatus.OK).body(jobs);
+    }
+
+    @Override
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer jobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        if (job.isPresent()) {
+            Job job1 = job.get();
+            job1.setOutstanding(job1.getOutstanding() == 1 ? 0 : 1);
+            jobRepository.save(job1);
+            return ResponseEntity.status(HttpStatus.OK).body((int) job1.getOutstanding());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
     @Override
     public List<Job> getJobsBySameType(Integer jobId) {
         // Tìm tất cả các loại công việc liên quan đến công việc
@@ -235,5 +275,22 @@ public class JobService implements IJobService{
 
         // Tìm tất cả các công việc có cùng loại
         return jobRepository.findByTypesJobs_NameIn(typeNames);
+
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<JobResponse> findAllByCompanyAndSearch(Integer companyId, String title, String location, Pageable pageable) throws CustomException {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new CustomException("Company not found with id: " + companyId,HttpStatus.NOT_FOUND));
+
+
+        Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
+
+
+        return jobs.map(this::convertToJobResponse);
+    }
+
 }

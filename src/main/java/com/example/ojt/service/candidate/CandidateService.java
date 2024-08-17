@@ -531,22 +531,23 @@ public class CandidateService implements ICandidateService {
                         candidate.getGender(),
                         candidate.getLinkLinkedin(),
                         candidate.getLinkGit(),
-                        candidate.getPosition()
+                        candidate.getPosition(),
+                        candidate.getOutstanding()
                 ));
     }
 
 
     @Override
-    public ResponseEntity<Integer> changaStatus(Integer candidateId) {
-        Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
-
-        if (candidateOptional.isPresent()) {
-            Candidate candidate = candidateOptional.get();
-            candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
-            candidateRepository.save(candidate);
-            return ResponseEntity.ok(candidate.getStatus());
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
+            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+            if (candidateOptional.isPresent()) {
+                Candidate candidate = candidateOptional.get();
+                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
+                candidateRepository.save(candidate);
+                return ResponseEntity.ok(candidate.getStatus());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
         }
     }
 
@@ -564,6 +565,22 @@ public class CandidateService implements ICandidateService {
     }
 
     @Override
+
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId) {
+        Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+
+        if (candidateOptional.isPresent()) {
+            Candidate candidate = candidateOptional.get();
+            candidate.setOutstanding(candidate.getOutstanding() == 1 ? 0 : 1);
+            candidateRepository.save(candidate);
+            return ResponseEntity.status(HttpStatus.OK).body(candidate.getOutstanding());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @Override
+
     public List<LevelJob> getLevelJobs() {
         return levelJobRepository.findAll();
     }

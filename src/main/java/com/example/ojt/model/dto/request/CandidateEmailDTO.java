@@ -23,4 +23,5 @@ public class CandidateEmailDTO {
     private String linkLinkedin;
     private String linkGit;
     private String position;
+    private Integer outstanding;
 }
