@@ -47,7 +47,11 @@ public class CandidateAdminController {
     @PutMapping("/candidates/{candidateId}")
     public ResponseEntity<Integer> changeStatus(@PathVariable("candidateId") Integer candidateId) {
         return candidateService.changaStatus(candidateId);
+    }
 
+    @PatchMapping("/candidates/{candidateId}")
+    public ResponseEntity<Integer> changeOutstandingStatus(@PathVariable Integer candidateId) {
+        return candidateService.changeOutstandingStatus(candidateId);
     }
 }
 

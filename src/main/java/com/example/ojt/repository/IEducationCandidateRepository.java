@@ -15,6 +15,7 @@ public interface IEducationCandidateRepository extends JpaRepository<EducationCa
     Page<EducationCandidate> findEducationCandidatesByCandidateAndNameEducationContains(Candidate candidate, String name, Pageable pageable);
 
     Page<EducationCandidate> findAllByCandidate(Candidate candidate, Pageable pageable);
+    List<EducationCandidate> findAllByCandidateId(Integer id);
 
     Optional<EducationCandidate> findByNameEducation(String name);
 

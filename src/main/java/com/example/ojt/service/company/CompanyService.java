@@ -98,6 +98,7 @@ public class CompanyService implements ICompanyService {
         return convertToCompanyResponse(company);
     }
 
+
     @Override
     public List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId) {
         Optional<Company> companyDetail = companyRepository.findById(companyId);
@@ -212,6 +213,19 @@ public class CompanyService implements ICompanyService {
             throw new IdFormatException("Company with ID " + id + " does not exist");
         }
         companyRepository.deleteById(id);
+    }
+
+
+    @Override
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer companyId) {
+        Optional<Company> company = companyRepository.findById(companyId);
+        if (company.isPresent()) {
+            Company company1 = company.get();
+            company1.setOutstanding(company1.getOutstanding() == 1 ? 0 : 1);
+            companyRepository.save(company1);
+            return ResponseEntity.status(HttpStatus.OK).body(company1.getOutstanding());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
 

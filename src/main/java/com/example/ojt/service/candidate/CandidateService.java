@@ -5,6 +5,7 @@ import com.example.ojt.model.dto.request.*;
 import com.example.ojt.model.dto.response.*;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
+import com.example.ojt.service.UploadService;
 import com.example.ojt.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,14 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 
 @Service
@@ -35,10 +34,14 @@ public class CandidateService implements ICandidateService {
     private final IProjectCandidateRepository projectCandidateRepository;
     private final ISkillCandidateRepository skillCandidateRepository;
     private final ILevelJobRepository levelJobRepository;
-//    private final ISkillRepository skillRepository;
     private final IExperienceRepository experienceRepository;
+    private final ICVRepository cvRepository;
     private final IProjectRepository projectRepository;
+
     private final IJobCandidateRepository jobCandidateRepository;
+
+    private final UploadService uploadService;
+    private final ILetterRepository letterRepository;
 
     private Candidate getCurrentCandidate() {
         return candidateRepository.findCandidateByAccountId(AccountService.getCurrentUser().getId());
@@ -89,7 +92,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public EducationCandidate getEducationCandidate(Integer id) throws CustomException {
-        return educationCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Education not found", HttpStatus.NOT_FOUND));
+        return educationCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Education not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -180,7 +183,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public ExperienceCandidate getExperienceCandidate(Integer id) throws CustomException {
-        return experienceCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Experience not found", HttpStatus.NOT_FOUND));
+        return experienceCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Experience not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -235,7 +238,7 @@ public class CandidateService implements ICandidateService {
     @Override
     @Transactional
     public boolean addCertificate(AddCertificateReq addCertificateReq) throws CustomException {
-        if (certificateRepository.findByNameAndCandidate(addCertificateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (certificateRepository.findByNameAndCandidate(addCertificateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Certificate already exist", HttpStatus.BAD_REQUEST);
         }
         CertificateCandidate certificateCandidate = CertificateCandidate.builder()
@@ -270,7 +273,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public CertificateCandidate getCertificateCandidate(Integer id) throws CustomException {
-        return certificateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Certificate not found", HttpStatus.NOT_FOUND));
+        return certificateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Certificate not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -307,7 +310,7 @@ public class CandidateService implements ICandidateService {
         if (updateCertificateReq.getStartAt() != null) {
             certificateCandidate.setStartAt(updateCertificateReq.getStartAt());
         }
-        if (updateCertificateReq.getStartAt()!=null && updateCertificateReq.getEndAt()!=null){
+        if (updateCertificateReq.getStartAt() != null && updateCertificateReq.getEndAt() != null) {
             if (certificateCandidate.getEndAt().toInstant().isBefore(certificateCandidate.getStartAt().toInstant())) {
                 throw new CustomException("End date must be after start date", HttpStatus.BAD_REQUEST);
             }
@@ -318,10 +321,10 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public boolean addProject(AddProjectCandidateReq addProjectCandidateReq) throws CustomException {
-        if (projectCandidateRepository.findByNameAndCandidate(addProjectCandidateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (projectCandidateRepository.findByNameAndCandidate(addProjectCandidateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Project already exist", HttpStatus.BAD_REQUEST);
         }
-        if (addProjectCandidateReq.getEndAt()!=null && addProjectCandidateReq.getEndAt()!=null){
+        if (addProjectCandidateReq.getEndAt() != null && addProjectCandidateReq.getEndAt() != null) {
             if (addProjectCandidateReq.getEndAt().toInstant().isBefore(addProjectCandidateReq.getStartAt().toInstant())) {
                 throw new CustomException("End date must be after start date", HttpStatus.BAD_REQUEST);
             }
@@ -380,7 +383,7 @@ public class CandidateService implements ICandidateService {
         if (updateProjectReq.getStartAt() != null) {
             projectCandidate.setStartAt(updateProjectReq.getStartAt());
         }
-        if (updateProjectReq.getEndAt()!=null && updateProjectReq.getEndAt()!=null){
+        if (updateProjectReq.getEndAt() != null && updateProjectReq.getEndAt() != null) {
             if (projectCandidate.getEndAt().toInstant().isBefore(projectCandidate.getStartAt().toInstant())) {
                 throw new CustomException("End at must be after start at", HttpStatus.BAD_REQUEST);
             }
@@ -404,18 +407,18 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public ProjectCandidate getProject(Integer id) throws CustomException {
-        return projectCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Project not found", HttpStatus.NOT_FOUND));
+        return projectCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Project not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
     public boolean addSkill(AddSkillCandidateReq addSkillCandidateReq) throws CustomException {
-        if (skillCandidateRepository.findByNameAndCandidate(addSkillCandidateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (skillCandidateRepository.findByNameAndCandidate(addSkillCandidateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Skill already exist", HttpStatus.BAD_REQUEST);
         }
         SkillsCandidate skillsCandidate = SkillsCandidate.builder()
                 .name(addSkillCandidateReq.getName())
                 .candidate(getCurrentCandidate())
-                .levelJob(levelJobRepository.findByName(addSkillCandidateReq.getLevelJobName()).orElseThrow(() -> new CustomException("Level Job not found", HttpStatus.NOT_FOUND)))
+                .levelJob(levelJobRepository.findById(addSkillCandidateReq.getLevelJobId()).orElseThrow(() -> new CustomException("Level Job not found", HttpStatus.NOT_FOUND)))
                 .build();
         skillCandidateRepository.save(skillsCandidate);
         return true;
@@ -441,7 +444,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public SkillsCandidate getSkill(Integer id) throws CustomException {
-        return skillCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Skill not found", HttpStatus.NOT_FOUND));
+        return skillCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Skill not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -470,10 +473,205 @@ public class CandidateService implements ICandidateService {
         skillCandidateRepository.delete(skillsCandidate);
         return true;
     }
+
     @Override
-    public CVResponse getCandidateCV(Integer candidateId) throws CustomException {
+    public Object getCandidateCV(Integer candidateId) throws CustomException {
+        CV topCV = cvRepository.findByCandidateIdAndStatusTrue(candidateId);
+        if (topCV != null) {
+            return new CVResponse(topCV.getId(), topCV.getFileName(), topCV.getUrl(), topCV.isStatus(), topCV.getCreatedAt());
+        } else {
+            return getDefaultCVByCandidate(candidateId);
+        }
+
+    }
+
+    @Override
+    public CandidateBasicInfoResponse getBasicInfo(Integer candidateId) throws CustomException {
         Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
-        CVResponse response = new CVResponse();
+        CandidateBasicInfoResponse response = new CandidateBasicInfoResponse();
+//        Thiết lập các thông tin cơ bản
+        response.setName(candidate.getName());
+        response.setAbout(candidate.getAboutme());
+        response.setPhone(candidate.getPhone());
+        LocalDate birthDate = candidate.getBirthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        response.setAge(Period.between(birthDate, LocalDate.now()).getYears());
+        response.setAddress(candidate.getAddress());
+        response.setAvatar(candidate.getAvatar());
+        response.setGender(candidate.getGender());
+        response.setLinkLinkedin(candidate.getLinkLinkedin());
+        response.setLinkGit(candidate.getLinkGit());
+        response.setPosition(candidate.getPosition());
+        List<ExperienceCVResponse> experienceCVResponses = new ArrayList<>();
+        List<ExperienceCandidate> experiences = experienceRepository.findAllByCandidateId(candidateId);
+        for (ExperienceCandidate experience : experiences) {
+            experienceCVResponses.add(new ExperienceCVResponse(experience.getPosition(), experience.getCompany(), experience.getStartAt(), experience.getEndAt(), experience.getInfo()));
+        }
+        response.setExperience(experienceCVResponses);
+        List<SkillsCandidate> skills = skillCandidateRepository.findAllByCandidateId(candidateId);
+        List<String> skillList = new ArrayList<>();
+        for (SkillsCandidate skill : skills) {
+            skillList.add(skill.getName());
+        }
+        response.setSkills(skillList);
+        Optional<ApplicationLetter> letter = letterRepository.findByCandidateId(candidateId);
+        letter.ifPresent(applicationLetter -> response.setLetter(applicationLetter.getContent()));
+        return response;
+    }
+
+
+    @Override
+    public Page<CandidateEmailDTO> getAllCandidatesWithEmail(Pageable pageable, String search) {
+        // Search for candidates by name or account email
+        return candidateRepository.findByNameContainingOrAccountEmailContaining(search, search, pageable)
+                .map(candidate -> new CandidateEmailDTO(
+                        candidate.getId(),
+                        candidate.getName(),
+                        candidate.getAccount() != null ? candidate.getAccount().getEmail() : null,
+                        candidate.getBirthday(),
+                        candidate.getAddress(),
+                        candidate.getPhone(),
+                        candidate.getStatus(),
+                        candidate.getGender(),
+                        candidate.getLinkLinkedin(),
+                        candidate.getLinkGit(),
+                        candidate.getPosition(),
+                        candidate.getOutstanding()
+                ));
+    }
+
+
+    @Override
+        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
+            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+            if (candidateOptional.isPresent()) {
+                Candidate candidate = candidateOptional.get();
+                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
+                candidateRepository.save(candidate);
+                return ResponseEntity.ok(candidate.getStatus());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        }
+    }
+
+
+    @Override
+    public UserInfo getInfoByUser() {
+        return UserInfo.builder()
+                .candidate(getCurrentCandidate())
+                .certificate(certificateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .education(educationCandidateRepository.findAllByCandidate(getCurrentCandidate()))
+                .experience(experienceCandidateRepository.findAllByCandidate(getCurrentCandidate()))
+                .project(projectRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .skillsCandidates(skillCandidateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
+                .build();
+    }
+
+    @Override
+
+    public List<Candidate> getCandidatesByJobId(Integer jobId) {
+        List<JobCandidates> jobCandidates = jobCandidateRepository.findByJobId(jobId);
+        return jobCandidates.stream()
+                .map(JobCandidates::getCandidate)
+                .toList();
+
+
+    public ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId) {
+        Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+
+        if (candidateOptional.isPresent()) {
+            Candidate candidate = candidateOptional.get();
+            candidate.setOutstanding(candidate.getOutstanding() == 1 ? 0 : 1);
+            candidateRepository.save(candidate);
+            return ResponseEntity.status(HttpStatus.OK).body(candidate.getOutstanding());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @Override
+
+    public List<LevelJob> getLevelJobs() {
+        return levelJobRepository.findAll();
+    }
+
+    @Override
+    public void uploadCV(MultipartFile file) throws CustomException {
+        // Validate dạng file
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                (!contentType.equals("application/pdf") &&
+                        !contentType.equals("application/msword") &&
+                        !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+            throw new CustomException("Invalid file type. Only PDF and DOC/DOCX files are allowed.", HttpStatus.BAD_REQUEST);
+        }
+        //Upload file
+        String url = uploadService.uploadFileToServer(file);
+        CV cv = CV.builder()
+                .url(url)
+                .candidate(getCurrentCandidate())
+                .fileName(getCurrentCandidate().getName() + LocalDate.now())
+                .status(false)
+                .createdAt(new Date())
+                .build();
+        cvRepository.save(cv);
+    }
+
+
+    @Override
+    public List<CVResponse> findAllByCurrentCandidate() {
+        List<CV> cvList = cvRepository.findAllByCandidate(getCurrentCandidate());
+        List<CVResponse> responses = new ArrayList<>();
+        for (CV cv : cvList) {
+            responses.add(new CVResponse(cv.getId(), cv.getFileName(), cv.getUrl(), cv.isStatus(), cv.getCreatedAt()));
+        }
+        return responses;
+    }
+
+    @Override
+    public void toggleCVPriority(Integer id) throws CustomException {
+        List<CV> userCVs = cvRepository.findAllByCandidate(getCurrentCandidate());
+        for (CV userCV : userCVs) {
+            if (!Objects.equals(userCV.getId(), id)) {
+                userCV.setStatus(false);
+            } else {
+                userCV.setStatus(!userCV.isStatus());
+            }
+        }
+
+    }
+
+    @Override
+    public void deleteCV(Integer id) throws CustomException {
+        CV cv = cvRepository.findById(id).orElseThrow(() -> new CustomException("CV not found!", HttpStatus.NOT_FOUND));
+        cvRepository.delete(cv);
+    }
+
+    @Override
+    public CV getTopCV(Integer userId) {
+        return cvRepository.findByCandidateIdAndStatusTrue(userId);
+    }
+
+    @Override
+    public void editCVName(Integer id, String name) throws CustomException {
+        CV cv = cvRepository.findById(id).orElseThrow(() -> new CustomException("CV not found!", HttpStatus.NOT_FOUND));
+        cv.setFileName(name);
+        cvRepository.save(cv);
+    }
+
+    @Override
+    public CVResponse getCVById(Integer id) throws CustomException {
+        CV cv = cvRepository.findById(id).orElseThrow(() -> new CustomException("CV not found!", HttpStatus.NOT_FOUND));
+        if (!Objects.equals(getCurrentCandidate().getId(), cv.getCandidate().getId())) {
+            throw new CustomException("You cannot view someone else's CV!", HttpStatus.UNAUTHORIZED);
+        }
+        return new CVResponse(cv.getId(), cv.getFileName(), cv.getUrl(), cv.isStatus(), cv.getCreatedAt());
+    }
+
+    @Override
+    public CVPage getDefaultCVByCandidate(Integer candidateId) throws CustomException {
+        Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
+        CVPage response = new CVPage();
 //        Thiết lập các thông tin cơ bản
         response.setName(candidate.getName());
         response.setAbout(candidate.getAboutme());
@@ -506,7 +704,7 @@ public class CandidateService implements ICandidateService {
         for (ExperienceCandidate experience : experiences) {
             experienceCVResponses.add(new ExperienceCVResponse(experience.getPosition(), experience.getCompany(), experience.getStartAt(), experience.getEndAt(), experience.getInfo()));
         }
-        response.setExperiences(experienceCVResponses);
+        response.setExperience(experienceCVResponses);
 //        Dự án
         List<ProjectCandidate> projects = projectRepository.findAllByCandidateId(candidateId);
         List<ProjectCVResponse> projectCVResponses = new ArrayList<>();
@@ -514,82 +712,43 @@ public class CandidateService implements ICandidateService {
             projectCVResponses.add(new ProjectCVResponse(projectCandidate.getName(), projectCandidate.getLink(), projectCandidate.getStartAt(), projectCandidate.getEndAt(), projectCandidate.getInfo()));
         }
         response.setProjects(projectCVResponses);
-        return response;
-    }
-
-    @Override
-    public CandidateBasicInfoResponse getBasicInfo(Integer candidateId) throws CustomException {
-        Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
-        CandidateBasicInfoResponse response = new CandidateBasicInfoResponse();
-//        Thiết lập các thông tin cơ bản
-        response.setName(candidate.getName()    );
-        response.setAbout(candidate.getAboutme());
-        response.setPhone(candidate.getPhone());
-        LocalDate birthDate = candidate.getBirthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        response.setAge(Period.between(birthDate, LocalDate.now()).getYears());
-        response.setAddress(candidate.getAddress());
-        response.setAvatar(candidate.getAvatar());
-        response.setGender(candidate.getGender());
-        response.setLinkLinkedin(candidate.getLinkLinkedin());
-        response.setLinkGit(candidate.getLinkGit());
-        return response;
-    }
-
-
-
-    @Override
-    public Page<CandidateEmailDTO> getAllCandidatesWithEmail(Pageable pageable, String search) {
-        // Search for candidates by name or account email
-        return candidateRepository.findByNameContainingOrAccountEmailContaining(search, search, pageable)
-                .map(candidate -> new CandidateEmailDTO(
-                        candidate.getId(),
-                        candidate.getName(),
-                        candidate.getAccount() != null ? candidate.getAccount().getEmail() : null,
-                        candidate.getBirthday(),
-                        candidate.getAddress(),
-                        candidate.getPhone(),
-                        candidate.getStatus(),
-                        candidate.getGender(),
-                        candidate.getLinkLinkedin(),
-                        candidate.getLinkGit(),
-                        candidate.getPosition()
-                ));
-    }
-
-
-
-    @Override
-        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
-            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
-
-            if (candidateOptional.isPresent()) {
-                Candidate candidate = candidateOptional.get();
-                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
-                candidateRepository.save(candidate);
-                return ResponseEntity.ok(candidate.getStatus());
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
+//        Học vấn
+        List<EducationCandidate> educations = educationCandidateRepository.findAllByCandidateId(candidateId);
+        List<EducationCVResponse> educationCVResponses = new ArrayList<>();
+        for (EducationCandidate education : educations) {
+            educationCVResponses.add(new EducationCVResponse(education.getNameEducation(), education.getMajor(), education.getStartAt(), education.getEndAt(), education.getInfo()));
         }
-
-
-    @Override
-    public UserInfo getInfoByUser() {
-        return UserInfo.builder()
-                .candidate(getCurrentCandidate())
-                .certificate(certificateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
-                .education(educationCandidateRepository.findAllByCandidate(getCurrentCandidate()))
-                .experience(experienceCandidateRepository.findAllByCandidate(getCurrentCandidate()))
-                .project(projectRepository.findAllByCandidateId(getCurrentCandidate().getId()))
-                .skillsCandidates(skillCandidateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
-                .build();
+        response.setEducations(educationCVResponses);
+        return response;
     }
 
     @Override
-    public List<Candidate> getCandidatesByJobId(Integer jobId) {
-        List<JobCandidates> jobCandidates = jobCandidateRepository.findByJobId(jobId);
-        return jobCandidates.stream()
-                .map(JobCandidates::getCandidate)
-                .toList();
+    public CVPage getDefaultCV() throws CustomException {
+        Integer id = getCurrentCandidate().getId();
+        return getDefaultCVByCandidate(id);
+    }
+
+    @Override
+    public String getCurrentCandidateLetter() {
+        Optional<ApplicationLetter> letter=letterRepository.findByCandidateId(getCurrentCandidate().getId());
+        return letter.map(ApplicationLetter::getContent).orElse(null);
+    }
+
+    @Override
+    public void addLetter(String content) {
+        ApplicationLetter letter = ApplicationLetter.builder()
+                .candidate(getCurrentCandidate())
+                .content(content).build();
+        letterRepository.save(letter);
+    }
+
+    @Override
+    public void editLetter(String content) {
+        ApplicationLetter letter = letterRepository.findByCandidateId(getCurrentCandidate().getId()).get();
+        letter.setContent(content);
+        letterRepository.save(letter);
+
     }
 }
+
+

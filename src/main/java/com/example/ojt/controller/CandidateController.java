@@ -2,20 +2,16 @@ package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.*;
-
-import com.example.ojt.model.dto.request.EduCandidateAddReq;
-import com.example.ojt.model.dto.request.UpdateAccountCandidate;
 import com.example.ojt.model.dto.response.APIResponse;
+import com.example.ojt.model.dto.response.CVResponse;
+import com.example.ojt.model.dto.response.SuccessResponse;
 import com.example.ojt.model.dto.response.UserInfo;
 import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.*;
-import com.example.ojt.service.candidate.ICandidateService;
-import com.example.ojt.model.entity.EducationCandidate;
-import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.account.IAccountService;
+import com.example.ojt.service.candidate.ICandidateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +19,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api.myservice.com/v1/candidate")
@@ -273,4 +272,74 @@ public class CandidateController {
        APIResponse response = new APIResponse(200, "Get info success");
        return new ResponseEntity<>(new DataResponse<>(response, userInfo), HttpStatus.OK);
    }
+   @GetMapping("/getlvjob")
+    public  ResponseEntity<?> getLvJob() {
+       List<LevelJob> levelJobs = candidateService.getLevelJobs();
+       APIResponse response = new APIResponse(200, "Get level job success");
+       return new ResponseEntity<>(new DataResponse<>(response, levelJobs), HttpStatus.OK);
+   }
+
+    //   Quản lý CV
+//    Lấy danh sách CV
+    @GetMapping("/cv/getAll")
+    public ResponseEntity<?> getAllCVs() {
+        List<CVResponse> CVs = candidateService.findAllByCurrentCandidate();
+        return ResponseEntity.ok(CVs);
+    }
+
+    @GetMapping("/cv/{id}")
+    public ResponseEntity<?> viewCV(@PathVariable Integer id) throws CustomException {
+        return ResponseEntity.ok(candidateService.getCVById(id));
+    }
+
+    @GetMapping("/defaultCV")
+    public ResponseEntity<?> viewDefaultCV() throws CustomException {
+        return ResponseEntity.ok(candidateService.getDefaultCV());
+    }
+
+    //    Thay đổi CV ưu tiên
+    @PutMapping("/cv/{id}")
+    public ResponseEntity<?> toggleCVPriority(@PathVariable Integer id) throws CustomException {
+        candidateService.toggleCVPriority(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/cv/{id}")
+    public ResponseEntity<?> deleteCV(@PathVariable Integer id) throws CustomException {
+        candidateService.deleteCV(id);
+        return ResponseEntity.ok().build();
+    }
+
+    //    Upload CV
+    @PostMapping("/cv/upload")
+    public ResponseEntity<?> uploadCV(@ModelAttribute MultipartFile file) throws CustomException {
+        candidateService.uploadCV(file);
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "CV uploaded successfully!", ""));
+    }
+
+    @PutMapping("/cv/changeCVName/{id}")
+    public ResponseEntity<?> changeCVName(@PathVariable Integer id, @RequestParam String name) throws CustomException {
+        candidateService.editCVName(id, name);
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Name saved successfully!", ""));
+    }
+
+    //    Thư xin việc
+    @GetMapping("/letter")
+    public ResponseEntity<?> getCurrentLetter() throws CustomException {
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Application letter added successfully!",candidateService.getCurrentCandidateLetter() ));
+    }
+
+
+    @PostMapping("/letter")
+    public ResponseEntity<?> addLetter(@RequestParam String content) throws CustomException {
+        candidateService.addLetter(content);
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Application letter added successfully!", ""));
+    }
+
+    @PutMapping("/letter")
+    public ResponseEntity<?> updateLetter(@RequestParam String content) throws CustomException {
+        candidateService.editLetter(content);
+        return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Content saved successfully!", ""));
+    }
+
 }

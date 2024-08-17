@@ -29,6 +29,7 @@ public class Job {
     @Column(name = "expire_at", columnDefinition = "VARCHAR(20)")
     private String expireAt;
     private Timestamp createdAt;
+    private double outstanding;
     private int status;
 
     @ManyToOne

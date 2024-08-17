@@ -1,6 +1,6 @@
 package com.example.ojt.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,18 +12,13 @@ import java.util.Date;
 @Setter
 @Builder
 @Entity
-public class SkillsCandidate {
+public class ApplicationLetter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "name", columnDefinition = "VARCHAR(55)")
-    private String name;
-    @JsonIgnore
-    @ManyToOne
+    @Lob
+    private String content;
+    @OneToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
-    @ManyToOne
-    @JoinColumn(name = "leveljob_id")
-    private LevelJob levelJob;
-
 }

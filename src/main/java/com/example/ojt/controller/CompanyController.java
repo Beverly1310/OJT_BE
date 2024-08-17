@@ -86,10 +86,7 @@ public class CompanyController {
         }
     }
 
-    @GetMapping("/viewCandidateCV/{candidateId}")
-    public ResponseEntity<?> viewCandidateCV(@PathVariable Integer candidateId) throws CustomException{
-        return ResponseEntity.ok(candidateService.getCandidateCV(candidateId));
-    }
+
 
     @GetMapping("viewCandidateInfo/{candidateId}")
     public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
@@ -101,4 +98,5 @@ public class CompanyController {
     public List<Candidate> getCandidatesByJob(@PathVariable Integer jobId) {
         return candidateService.getCandidatesByJobId(jobId);
     }
+
 }
