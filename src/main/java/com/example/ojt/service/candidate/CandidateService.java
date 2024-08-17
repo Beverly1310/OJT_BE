@@ -552,7 +552,8 @@ public class CandidateService implements ICandidateService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         }
-    }
+
+
 
 
     @Override
@@ -568,14 +569,15 @@ public class CandidateService implements ICandidateService {
     }
 
     @Override
-
     public List<Candidate> getCandidatesByJobId(Integer jobId) {
         List<JobCandidates> jobCandidates = jobCandidateRepository.findByJobId(jobId);
         return jobCandidates.stream()
                 .map(JobCandidates::getCandidate)
                 .toList();
 
+    }
 
+    @Override
     public ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId) {
         Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
 
