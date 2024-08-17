@@ -114,12 +114,16 @@ public class AccountService implements IAccountService {
                 authentication = manager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginAccountRequest.getEmail(), loginAccountRequest.getPassword()));
             } catch (AuthenticationException e) {
-                throw new CustomException("Email or password incorrect or account hasn't verify", HttpStatus.NOT_FOUND);
+                throw new CustomException("Sai email hoặc mật khẩu!", HttpStatus.NOT_FOUND);
             }
 
             AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();
             if (detailsCustom.getStatus() == 2) {
-                throw new CustomException("Account has been blocked!", HttpStatus.UNAUTHORIZED);
+                throw new CustomException("Tài khoản bị khóa!", HttpStatus.UNAUTHORIZED);
+            }
+
+            if (detailsCustom.getStatus() == 0) {
+                throw new CustomException("Tài khoản chưa được xác thực!", HttpStatus.UNAUTHORIZED);
             }
 
             String accessToken = jwtProvider.generateAccessToken(detailsCustom);
@@ -132,7 +136,7 @@ public class AccountService implements IAccountService {
                     .accessToken(accessToken)
                     .build();
         } else {
-            throw new CustomException("Account not found!", HttpStatus.NOT_FOUND);
+            throw new CustomException("Không tìm thấy tài khoản!", HttpStatus.NOT_FOUND);
         }
 
     }

@@ -1,30 +1,20 @@
 package com.example.ojt.model.dto.response;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.List;
-@AllArgsConstructor
-@NoArgsConstructor
+import java.util.Date;
+
+@Builder
 @Getter
 @Setter
-@Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class CVResponse
-{
-    String name;
-    String about;
-    List<ExperienceCVResponse> experience;
-    Integer age;
-    String address;
-    List<SkillCVResponse> skills;
-    List<CertificateCVResponse> certificates;
-    List<ProjectCVResponse> projects;
-    List<EducationCVResponse> educations;
-    String phone;
-    Boolean gender;
-    String linkLinkedin;
-    String linkGit;
-    String avatar;
-
+@AllArgsConstructor
+public class CVResponse {
+    private Integer id;
+    private String fileName;
+    private String url;
+    private boolean status;
+    private Date createdAt;
 }
