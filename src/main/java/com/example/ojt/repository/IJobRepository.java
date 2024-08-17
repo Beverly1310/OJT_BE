@@ -1,5 +1,6 @@
 package com.example.ojt.repository;
 
+import com.example.ojt.model.dto.response.JobResponse;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.model.entity.Job;
 import org.springframework.data.domain.Example;
@@ -20,7 +21,7 @@ public interface IJobRepository extends JpaRepository<Job,Integer> {
 Page<Job> findAllByTitleContains(String title , Pageable pageable);
 Optional<Job> findByTitle(String title);
 Optional<Job> findByIdAndCompany(Integer id, Company company);
-
+    Optional<Job> findFirstByCompany(Company company);
 //    @Override
 //    @Query("SELECT j FROM Job j WHERE j.status = 1")
 //    List<Job> findAll();  // Override phương thức findAll với custom query
@@ -47,5 +48,5 @@ Optional<Job> findByIdAndCompany(Integer id, Company company);
             @Param("location") String location,
             Pageable pageable);
 //    Page<Job> findAllByCompanyAndTitleContainingAndAddressCompany_Location_NameCityContaining(String title, String nameCity, Company company, Pageable pageable);
-    Page<Job> findAllByCompany(Company company , Pageable pageable);
+List<Job> findByCompany(Company company);
 }

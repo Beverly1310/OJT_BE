@@ -100,6 +100,7 @@ public class JobService implements IJobService{
                 .city(job.getAddressCompany().getLocation().getNameCity())
                 .companyLogo(job.getCompany().getLogo())
                 .typeJob(typeJobRepository.findByJobId(job.getId()))
+                .levelJob(levelJobRepository.findLevelJobNamesByJobId(job.getId()))
                 .build();
     }
 
@@ -112,7 +113,7 @@ public class JobService implements IJobService{
         Location location = locationRepository.findById(jobRequest.getLocationId())
                 .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
 
-        // Thay thế đoạn code truy vấn AddressCompany như sau:
+
         List<AddressCompany> addressCompanies = addressCompanyRepository.findByLocation(location);
 
         // Kiểm tra nếu danh sách rỗng
@@ -122,7 +123,7 @@ public class JobService implements IJobService{
 
         // Nếu có nhiều kết quả, bạn có thể lấy kết quả đầu tiên hoặc thêm điều kiện lọc
         AddressCompany addressCompany = addressCompanies.stream()
-                .filter(ac -> ac.getCompany().getId().equals(company.getId())) // Ví dụ: lọc theo companyId
+                .filter(ac -> ac.getCompany().getId().equals(company.getId()))
                 .findFirst()
                 .orElseThrow(() -> new CustomException("Suitable Address Company not found", HttpStatus.NOT_FOUND));
 
@@ -304,5 +305,8 @@ public class JobService implements IJobService{
 
         return jobs.map(this::convertToJobResponse);
     }
+
+
+
 
 }

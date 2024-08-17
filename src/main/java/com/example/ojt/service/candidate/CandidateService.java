@@ -7,6 +7,7 @@ import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
 import com.example.ojt.service.UploadService;
 import com.example.ojt.service.account.AccountService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +38,8 @@ public class CandidateService implements ICandidateService {
     private final IExperienceRepository experienceRepository;
     private final ICVRepository cvRepository;
     private final IProjectRepository projectRepository;
-
+    private final IJobRepository jobRepository;
+    private final ICompanyRepository companyRepository;
     private final IJobCandidateRepository jobCandidateRepository;
 
     private final UploadService uploadService;
@@ -751,6 +753,79 @@ public class CandidateService implements ICandidateService {
         letterRepository.save(letter);
 
     }
+
+    @Override
+    public boolean followCompany(Integer companyId) {
+        // Lấy ứng viên hiện tại từ phiên đăng nhập
+        Candidate candidate = getCurrentCandidate();
+
+        // Tìm công ty
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+        // Kiểm tra xem ứng viên đã theo dõi công ty này chưa
+        JobCandidates existingJobCandidate = jobCandidateRepository.findByCandidateAndJob_Company(candidate, company);
+
+        if (existingJobCandidate != null) {
+            // Nếu đã theo dõi thì hủy theo dõi
+            jobCandidateRepository.delete(existingJobCandidate);
+
+            // Giảm số lượng người theo dõi
+            company.setFollowers(company.getFollowers() - 1);
+            companyRepository.save(company);
+        } else {
+            // Nếu chưa theo dõi thì theo dõi
+            Job job = findJobByCompany(company);
+            JobCandidates jobCandidates = new JobCandidates();
+            jobCandidates.setCandidate(candidate);
+            jobCandidates.setJob(job);
+            jobCandidateRepository.save(jobCandidates);
+
+            // Tăng số lượng người theo dõi
+            company.setFollowers(company.getFollowers() + 1);
+            companyRepository.save(company);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean unfollowCompany(Integer companyId) {
+        // Lấy ứng viên hiện tại từ phiên đăng nhập
+        Candidate candidate = getCurrentCandidate();
+
+        // Tìm công ty
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+        // Tìm jobCandidate hiện tại
+        JobCandidates existingJobCandidate = jobCandidateRepository.findByCandidateAndJob_Company(candidate, company);
+
+        if (existingJobCandidate != null) {
+            // Xóa jobCandidate
+            jobCandidateRepository.delete(existingJobCandidate);
+
+            // Giảm số lượng người theo dõi
+            company.setFollowers(company.getFollowers() - 1);
+            companyRepository.save(company);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Job findJobByCompany(Company company) {
+        // Tìm một công việc liên quan đến công ty
+        List<Job> jobs = jobRepository.findByCompany(company);
+        if (jobs.isEmpty()) {
+            throw new RuntimeException("No job found for company");
+        }
+        // Giả sử bạn chọn công việc đầu tiên trong danh sách
+        return jobs.get(0);
+    }
+
+
 }
 
 

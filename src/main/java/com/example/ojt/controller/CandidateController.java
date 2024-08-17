@@ -10,6 +10,7 @@ import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.service.account.IAccountService;
 import com.example.ojt.service.candidate.ICandidateService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -342,4 +343,33 @@ public class CandidateController {
         return ResponseEntity.ok(new SuccessResponse(HttpStatus.OK.value(), "Content saved successfully!", ""));
     }
 
+    @PostMapping("/followCompany")
+    public ResponseEntity<APIResponse> followCompany(
+            @RequestParam Integer companyId) {
+        try {
+            int result = candidateService.followCompany(companyId) ? 1 : 0;
+            return ResponseEntity.ok(new APIResponse(result, "Success"));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new APIResponse(0, "Not found: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new APIResponse(0, "Error: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/unfollowCompany")
+    public ResponseEntity<APIResponse> unfollowCompany(
+            @RequestParam Integer companyId) {
+        try {
+            int result = candidateService.unfollowCompany(companyId) ? 1 : 0;
+            return ResponseEntity.ok(new APIResponse(result, "Success"));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new APIResponse(0, "Not found: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new APIResponse(0, "Error: " + e.getMessage()));
+        }
+    }
 }
