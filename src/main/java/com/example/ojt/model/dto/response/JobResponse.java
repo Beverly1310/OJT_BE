@@ -29,5 +29,5 @@ public class JobResponse {
     private String city;
     private String companyLogo;
     private Set<String> typeJob;
-
+    private Set<String> levelJob;
 }

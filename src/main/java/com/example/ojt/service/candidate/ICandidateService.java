@@ -100,5 +100,6 @@ public interface ICandidateService {
     String getCurrentCandidateLetter();
     void addLetter(String content);
     void editLetter(String content);
-
+    boolean followCompany( Integer companyId);
+    boolean unfollowCompany( Integer companyId);
 }
