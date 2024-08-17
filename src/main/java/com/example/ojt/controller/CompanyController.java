@@ -3,6 +3,7 @@ package com.example.ojt.controller;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
 import com.example.ojt.model.dto.response.CompanyResponse;
+import com.example.ojt.model.entity.Candidate;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
@@ -85,5 +86,17 @@ public class CompanyController {
         }
     }
 
+
+
+    @GetMapping("viewCandidateInfo/{candidateId}")
+    public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
+        return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
+    }
+
+
+    @GetMapping("/job/{jobId}/candidates")
+    public List<Candidate> getCandidatesByJob(@PathVariable Integer jobId) {
+        return candidateService.getCandidatesByJobId(jobId);
+    }
 
 }

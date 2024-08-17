@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api.myservice.com/v1/company/address-company")
@@ -26,7 +27,11 @@ public class AddressController {
 
     @Autowired
     private IAddressService addressService;
-
+    @GetMapping("/current-company")
+    public ResponseEntity<List<AddressCompanyResponse>> getAddressCompaniesByCurrentCompany() throws CustomException {
+        List<AddressCompanyResponse> addressCompanies = addressService.findAllByCurrentCompany();
+        return new ResponseEntity<>(addressCompanies, HttpStatus.OK);
+    }
     @GetMapping
     public ResponseEntity<Page<AddressCompanyResponse>> findAll(
             @PageableDefault(page = 0, size = 3, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,

@@ -37,6 +37,9 @@ public class CandidateService implements ICandidateService {
     private final IExperienceRepository experienceRepository;
     private final ICVRepository cvRepository;
     private final IProjectRepository projectRepository;
+
+    private final IJobCandidateRepository jobCandidateRepository;
+
     private final UploadService uploadService;
     private final ILetterRepository letterRepository;
 
@@ -566,6 +569,13 @@ public class CandidateService implements ICandidateService {
 
     @Override
 
+    public List<Candidate> getCandidatesByJobId(Integer jobId) {
+        List<JobCandidates> jobCandidates = jobCandidateRepository.findByJobId(jobId);
+        return jobCandidates.stream()
+                .map(JobCandidates::getCandidate)
+                .toList();
+
+
     public ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId) {
         Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
 
@@ -737,6 +747,7 @@ public class CandidateService implements ICandidateService {
         ApplicationLetter letter = letterRepository.findByCandidateId(getCurrentCandidate().getId()).get();
         letter.setContent(content);
         letterRepository.save(letter);
+
     }
 }
 

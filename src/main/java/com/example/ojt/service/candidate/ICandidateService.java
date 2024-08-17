@@ -82,6 +82,9 @@ public interface ICandidateService {
     UserInfo getInfoByUser();
 
 
+    List<Candidate> getCandidatesByJobId(Integer jobId);
+
+
     ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
 
     List<LevelJob> getLevelJobs();
@@ -97,4 +100,5 @@ public interface ICandidateService {
     String getCurrentCandidateLetter();
     void addLetter(String content);
     void editLetter(String content);
+
 }
