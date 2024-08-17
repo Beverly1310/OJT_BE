@@ -38,6 +38,7 @@ public class CandidateService implements ICandidateService {
 //    private final ISkillRepository skillRepository;
     private final IExperienceRepository experienceRepository;
     private final IProjectRepository projectRepository;
+    private final IJobCandidateRepository jobCandidateRepository;
 
     private Candidate getCurrentCandidate() {
         return candidateRepository.findCandidateByAccountId(AccountService.getCurrentUser().getId());
@@ -582,5 +583,13 @@ public class CandidateService implements ICandidateService {
                 .project(projectRepository.findAllByCandidateId(getCurrentCandidate().getId()))
                 .skillsCandidates(skillCandidateRepository.findAllByCandidateId(getCurrentCandidate().getId()))
                 .build();
+    }
+
+    @Override
+    public List<Candidate> getCandidatesByJobId(Integer jobId) {
+        List<JobCandidates> jobCandidates = jobCandidateRepository.findByJobId(jobId);
+        return jobCandidates.stream()
+                .map(JobCandidates::getCandidate)
+                .toList();
     }
 }

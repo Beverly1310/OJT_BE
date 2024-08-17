@@ -1,9 +1,12 @@
 package com.example.ojt.model.dto.response;
 
 import com.example.ojt.model.entity.TypeJob;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 

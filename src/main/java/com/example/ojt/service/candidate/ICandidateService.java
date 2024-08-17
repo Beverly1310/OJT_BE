@@ -79,4 +79,6 @@ public interface ICandidateService {
 
     UserInfo getInfoByUser();
 
+    List<Candidate> getCandidatesByJobId(Integer jobId);
+
 }

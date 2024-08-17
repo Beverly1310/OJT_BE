@@ -8,14 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface IAddressCompanyRepository extends JpaRepository<AddressCompany, Integer> {
     boolean existsByAddress (String address);
     Optional<AddressCompany> findByAddress(String address);
-
+    List<AddressCompany> findAllByCompany(Company company);
     Page<AddressCompany> findAllByAddressContains(String address, Pageable pageable);
-    Optional<AddressCompany> findByLocation(Location location);
+    List<AddressCompany> findByLocation(Location location);
     Optional<AddressCompany> findByLocationIdAndCompanyId(Integer locationId, Integer companyId);
 }
