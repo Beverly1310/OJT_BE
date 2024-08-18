@@ -18,8 +18,6 @@ public class JobRequest {
     private String requirements;
     private String salary;
     private String expireAt;
-    private Integer companyId;
-    private Integer addressCompanyId;
     private List<Integer> levelJobIds;
     private List<Integer> typeJobIds;
 }

@@ -1,6 +1,7 @@
 package com.example.ojt.controller.admincontroller;
 
 import com.example.ojt.exception.IdFormatException;
+import com.example.ojt.service.account.IAccountService;
 import com.example.ojt.service.company.ICompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,9 @@ public class CompanyAdminController {
 
     @Autowired
     private ICompanyService companyService;
+
+    @Autowired
+    private IAccountService accountService;
 
     /**
      * lấy ds công ty
@@ -48,4 +52,21 @@ public class CompanyAdminController {
     public ResponseEntity<Integer> changeOutstandingStatus(@PathVariable Integer companyId){
         return companyService.changeOutstandingStatus(companyId);
     }
+
+
+    /**
+     * duyệt công ty
+     * @param companyId
+     * @return
+     */
+    @PatchMapping("/company/browse/{companyId}")
+    public ResponseEntity<Integer> changeStatusAcount(@PathVariable Integer companyId) {
+        return accountService.  changeStatusAcount(companyId);
+    }
+
+    @GetMapping("/companies/count")
+    public Long countCompany() {
+        return companyService.countCompanies();
+    }
+
 }

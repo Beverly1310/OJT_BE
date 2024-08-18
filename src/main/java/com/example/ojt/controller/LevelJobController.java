@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api.myservice.com/v1/company/level-job")
+@RequestMapping("/api.myservice.com/v1/level-job")
 public class LevelJobController {
     @Autowired
     private ILevelJobService levelJobService;

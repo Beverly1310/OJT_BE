@@ -9,6 +9,7 @@ import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
+import com.example.ojt.service.account.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,15 @@ public class CompanyService implements ICompanyService {
     private final IProjectCandidateRepository projectCandidateRepository;
     private final ICertificateRepository certificateRepository;
 
+    private  Company getCurrentCompany() throws CustomException {
+        Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
+        return company;
+    }
+    @Override
+    public CompanyResponse findCurrentCompany() throws CustomException {
+        Company company = getCurrentCompany();
+        return convertToCompanyResponse(company);
+    }
     @Override
     public Page<CompanyResponse> findAllCompanies(Pageable pageable, String locationName, String companyName) {
         Page<Company> companies;
@@ -111,6 +121,7 @@ public class CompanyService implements ICompanyService {
         }
         return Collections.emptyList();
     }
+
 
 
     @Override
@@ -221,6 +232,10 @@ public class CompanyService implements ICompanyService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    @Override
+    public Long countCompanies() {
+        return companyRepository.count();
+    }
 
     // @Override
     //    public ResponseEntity<Page<UserResponsedto>> findAllUser(Pageable pageable) {

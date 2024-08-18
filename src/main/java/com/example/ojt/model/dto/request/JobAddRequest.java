@@ -16,25 +16,29 @@ public class JobAddRequest {
     @NotNull(message = "Title must not be empty")
     @NotBlank(message = "Title must not be empty")
     private String title;
+
     @NotNull(message = "Description must not be empty")
     @NotBlank(message = "Description must not be empty")
     private String description;
+
     @NotNull(message = "Requirement must not be empty")
     @NotBlank(message = "Requirement must not be empty")
     private String requirements;
+
     @NotNull(message = "Salary must not be empty")
     @NotBlank(message = "Salary must not be empty")
     private String salary;
+
     @NotNull(message = "Expire date must not be empty")
     @NotBlank(message = "Expire date must not be empty")
     private String expireAt;
-    @NotNull(message = "Company ID must not be empty")
-    private Integer companyId;
 
-    @NotNull(message = "Address must not be empty")
-    private Integer addressCompanyId;
+    @NotNull(message = "Location must not be empty")
+    private Integer locationId;
+
     @NotNull(message = "Level must not be empty")
     private List<Integer> levelJobIds;
+
     @NotNull(message = "Type job must not be empty")
     private List<Integer> typeJobIds;
 }

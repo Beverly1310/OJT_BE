@@ -21,7 +21,7 @@ public interface ICompanyService {
 
     void deleteCompany(Integer id) throws IdFormatException;
 
-
+    CompanyResponse findCurrentCompany() throws CustomException;
 
     Page<CompanyResponse> findAllCompanies(Pageable pageable, String location, String search);
     CompanyResponse findById(Integer id) throws CustomException;
@@ -31,6 +31,8 @@ public interface ICompanyService {
 
     List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId);
 
+
+    Long countCompanies();
     CandidateInfoRes getCandidateInfoById(Integer candidateId) throws CustomException;
 
 }

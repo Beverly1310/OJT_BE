@@ -5,12 +5,14 @@ import com.example.ojt.model.dto.request.EditCompanyRequest;
 import com.example.ojt.model.dto.response.APIResponse;
 import com.example.ojt.model.dto.response.CandidateInfoRes;
 import com.example.ojt.model.dto.response.CompanyResponse;
+import com.example.ojt.model.entity.Candidate;
 import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class CompanyController {
     private final ICompanyService companyService;
     private final ICandidateService candidateService;
 
+
     @PutMapping("/update")
     public ResponseEntity<?> updateCompany(
             @ModelAttribute @Valid EditCompanyRequest companyRequest) {
@@ -46,6 +49,15 @@ public class CompanyController {
         }
     }
 
+    @GetMapping("/detail")
+    public ResponseEntity<?> findCurrentCompany() {
+        try {
+            CompanyResponse companyResponse = companyService.findCurrentCompany();
+            return ResponseEntity.ok().body(companyResponse);
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+        }
+    }
     @GetMapping
     public ResponseEntity<Page<CompanyResponse>> findAllCompanies(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
@@ -78,6 +90,25 @@ public class CompanyController {
         } catch (CustomException e) {
             return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
         }
+    }
+
+    @GetMapping("outstanding")
+    public ResponseEntity<?> OutstandingCandidate() {
+        return candidateService.findOutstandingCandidates();
+    }
+
+
+
+
+    @GetMapping("viewCandidateInfo/{candidateId}")
+    public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
+        return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
+    }
+
+
+    @GetMapping("/job/{jobId}/candidates")
+    public List<Candidate> getCandidatesByJob(@PathVariable Integer jobId) {
+        return candidateService.getCandidatesByJobId(jobId);
     }
 
     @GetMapping("/candidate/info/{id}")

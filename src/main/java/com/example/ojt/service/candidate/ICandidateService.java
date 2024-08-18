@@ -2,18 +2,22 @@ package com.example.ojt.service.candidate;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.*;
+import com.example.ojt.model.dto.response.CVResponse;
 import com.example.ojt.model.dto.response.UserInfo;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.model.dto.request.EduCandidateAddReq;
 import com.example.ojt.model.dto.request.UpdateEduCandidateReq;
-import com.example.ojt.model.dto.response.CVResponse;
+import com.example.ojt.model.dto.response.CVPage;
 import com.example.ojt.model.dto.response.CandidateBasicInfoResponse;
 import com.example.ojt.model.entity.EducationCandidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Date;
+import java.util.Map;
 
 public interface ICandidateService {
     boolean addEducation(EduCandidateAddReq eduCandidateAddReq) throws CustomException;
@@ -68,7 +72,7 @@ public interface ICandidateService {
 
     boolean deleteSkill(Integer id) throws CustomException;
 
-    CVResponse getCandidateCV(Integer candidateId) throws CustomException;
+    Object getCandidateCV(Integer candidateId) throws CustomException;
 
     CandidateBasicInfoResponse getBasicInfo(Integer candidateId) throws CustomException;
 
@@ -80,7 +84,34 @@ public interface ICandidateService {
     UserInfo getInfoByUser();
 
 
+    List<Candidate> getCandidatesByJobId(Integer jobId);
+
+
     ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
 
     List<LevelJob> getLevelJobs();
+
+    ResponseEntity<?> findOutstandingCandidates();
+
+    Page<CandidatePerMonth> findCandidatesByDateRange(Date startDate, Date endDate, Pageable pageable);
+
+    List<CandidatePerMonth> findCandidatesByMonth(int year, Pageable pageable);
+
+    long countCandidates();
+
+    void uploadCV(MultipartFile file) throws CustomException;
+    List<CVResponse> findAllByCurrentCandidate();
+    void toggleCVPriority(Integer id) throws CustomException;
+    void deleteCV(Integer id) throws CustomException;
+    CV getTopCV(Integer userId);
+    void editCVName(Integer id,String name) throws CustomException;
+    CVResponse getCVById(Integer id) throws CustomException;
+    CVPage getDefaultCVByCandidate(Integer candidateId) throws CustomException;
+    CVPage getDefaultCV() throws CustomException;
+    String getCurrentCandidateLetter();
+    void addLetter(String content);
+    void editLetter(String content);
+    boolean followCompany( Integer companyId);
+    boolean unfollowCompany( Integer companyId);
+
 }

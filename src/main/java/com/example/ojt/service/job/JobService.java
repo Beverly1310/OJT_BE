@@ -51,6 +51,12 @@ public class JobService implements IJobService{
     @Autowired
     private ITypesJobsRepository typesJobsRepository;
 
+    @Autowired
+    private ILocationRepository locationRepository;
+
+    @Autowired
+    private ICandidateRepository candidateRepository;
+
     private  Company getCurrentCompany() throws CustomException {
         Company company = companyRepository.findByAccountId(AccountService.getCurrentUser().getId()).orElseThrow(() -> new CustomException("Company not found" , HttpStatus.NOT_FOUND));
         return company;
@@ -74,9 +80,9 @@ public class JobService implements IJobService{
     @Override
     @Transactional(readOnly = true)
     public Page<JobResponse> findAllByCurrentCompany(String title, String location, Pageable pageable) throws CustomException {
-        Company company = getCurrentCompany(); // Phương thức lấy thông tin công ty hiện tại
+        Company company = getCurrentCompany();
         Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
-        return jobs.map(this::convertToJobResponse); // Chuyển đổi Job entity sang JobResponse
+        return jobs.map(this::convertToJobResponse);
     }
 
     private JobResponse convertToJobResponse(Job job) {
@@ -94,19 +100,37 @@ public class JobService implements IJobService{
                 .city(job.getAddressCompany().getLocation().getNameCity())
                 .companyLogo(job.getCompany().getLogo())
                 .typeJob(typeJobRepository.findByJobId(job.getId()))
+                .levelJob(levelJobRepository.findLevelJobNamesByJobId(job.getId()))
                 .build();
     }
 
-    @Override
+
+   @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
-        Company company = getCurrentCompany(); // Lấy company từ tài khoản hiện tại
+        Company company = getCurrentCompany();
 
-        AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
-                .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
-        if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null) != null) {
-            throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+        Location location = locationRepository.findById(jobRequest.getLocationId())
+                .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
+
+
+        List<AddressCompany> addressCompanies = addressCompanyRepository.findByLocation(location);
+
+        // Kiểm tra nếu danh sách rỗng
+        if (addressCompanies.isEmpty()) {
+            throw new CustomException("Address Company not found", HttpStatus.NOT_FOUND);
         }
+
+        // Nếu có nhiều kết quả, bạn có thể lấy kết quả đầu tiên hoặc thêm điều kiện lọc
+        AddressCompany addressCompany = addressCompanies.stream()
+                .filter(ac -> ac.getCompany().getId().equals(company.getId()))
+                .findFirst()
+                .orElseThrow(() -> new CustomException("Suitable Address Company not found", HttpStatus.NOT_FOUND));
+
+        if (jobRepository.findByTitle(jobRequest.getTitle()).orElse(null) != null) {
+            throw new CustomException("Job already exists", HttpStatus.BAD_REQUEST);
+        }
+
         Job job = Job.builder()
                 .title(jobRequest.getTitle())
                 .description(jobRequest.getDescription())
@@ -115,12 +139,13 @@ public class JobService implements IJobService{
                 .expireAt(jobRequest.getExpireAt())
                 .createdAt(new Timestamp(new Date().getTime()))
                 .status(1)
-                .company(company) // Liên kết với company hiện tại
+                .company(company)
                 .addressCompany(addressCompany)
                 .build();
+
         jobRepository.save(job);
 
-        // Liên kết với các LevelJob
+        // Link with LevelJobs
         List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
         for (LevelJob levelJob : levelJobs) {
             LevelsJobs levelsJobs = LevelsJobs.builder()
@@ -130,18 +155,19 @@ public class JobService implements IJobService{
             levelsJobsRepository.save(levelsJobs);
         }
 
+        // Link with TypeJobs
+        List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
+        for (TypeJob typeJob : typeJobs) {
+            TypesJobs typesJobs = TypesJobs.builder()
+                    .job(job)
+                    .typeJob(typeJob)
+                    .build();
+            typesJobsRepository.save(typesJobs);
+        }
 
-
-            List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
-            for (TypeJob typeJob : typeJobs) {
-                TypesJobs typesJobs = TypesJobs.builder()
-                        .job(job)
-                        .typeJob(typeJob)
-                        .build();
-                typesJobsRepository.save(typesJobs);
-            }
-            return true;
+        return true;
     }
+
 
 
 
@@ -149,12 +175,20 @@ public class JobService implements IJobService{
     @Transactional
     public boolean updateJob(JobRequest jobRequest) throws CustomException {
         try {
+            Company currentCompany = getCurrentCompany();
+
             Job job = jobRepository.findById(jobRequest.getId())
                     .orElseThrow(() -> new CustomException("Job not found", HttpStatus.NOT_FOUND));
-            Job jobCheck = jobRepository.findByTitle(job.getTitle()).orElse(null);
-            if (jobCheck!=null && jobCheck.getId()!=job.getId()){
-                throw new CustomException("Job already exist", HttpStatus.BAD_REQUEST);
+
+            if (!job.getCompany().getId().equals(currentCompany.getId())) {
+                throw new CustomException("You do not have permission to update this job", HttpStatus.FORBIDDEN);
             }
+
+            Job jobCheck = jobRepository.findByTitle(jobRequest.getTitle()).orElse(null);
+            if (jobCheck != null && !jobCheck.getId().equals(job.getId())) {
+                throw new CustomException("Job already exists", HttpStatus.BAD_REQUEST);
+            }
+
             if (jobRequest.getTitle() != null && !jobRequest.getTitle().isEmpty()) {
                 job.setTitle(jobRequest.getTitle());
             }
@@ -170,16 +204,7 @@ public class JobService implements IJobService{
             if (jobRequest.getExpireAt() != null) {
                 job.setExpireAt(jobRequest.getExpireAt());
             }
-            if (jobRequest.getCompanyId() != null) {
-                Company company = companyRepository.findById(jobRequest.getCompanyId())
-                        .orElseThrow(() -> new CustomException("Company not found", HttpStatus.NOT_FOUND));
-                job.setCompany(company);
-            }
-            if (jobRequest.getAddressCompanyId() != null) {
-                AddressCompany addressCompany = addressCompanyRepository.findById(jobRequest.getAddressCompanyId())
-                        .orElseThrow(() -> new CustomException("Address Company not found", HttpStatus.NOT_FOUND));
-                job.setAddressCompany(addressCompany);
-            }
+
             if (jobRequest.getLevelJobIds() != null && !jobRequest.getLevelJobIds().isEmpty()) {
                 levelsJobsRepository.deleteAllByJobId(job.getId());
                 List<LevelJob> levelJobs = levelJobRepository.findAllById(jobRequest.getLevelJobIds());
@@ -191,6 +216,7 @@ public class JobService implements IJobService{
                     levelsJobsRepository.save(levelsJobs);
                 }
             }
+
             if (jobRequest.getTypeJobIds() != null && !jobRequest.getTypeJobIds().isEmpty()) {
                 typesJobsRepository.deleteAllByJobId(job.getId());
                 List<TypeJob> typeJobs = typeJobRepository.findAllById(jobRequest.getTypeJobIds());
@@ -210,6 +236,7 @@ public class JobService implements IJobService{
             throw new CustomException("Failed to update job", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     @Override
@@ -263,4 +290,23 @@ public class JobService implements IJobService{
         return jobRepository.findByTypesJobs_NameIn(typeNames);
 
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<JobResponse> findAllByCompanyAndSearch(Integer companyId, String title, String location, Pageable pageable) throws CustomException {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new CustomException("Company not found with id: " + companyId,HttpStatus.NOT_FOUND));
+
+
+        Page<Job> jobs = jobRepository.findAllByCompanyAndTitleContainingAndLocationContaining(company, title, location, pageable);
+
+
+        return jobs.map(this::convertToJobResponse);
+    }
+
+
+
+
 }

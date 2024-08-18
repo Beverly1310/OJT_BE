@@ -24,6 +24,7 @@ import com.example.ojt.service.EmailSenderService;
 import com.example.ojt.service.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,8 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +82,7 @@ public class AccountService implements IAccountService {
     public static AccountDetailsCustom getCurrentUser() {
         return (AccountDetailsCustom) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
+
     @Override
     public JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException {
         Account account = accountRepository.findByEmail(loginAccountRequest.getEmail())
@@ -114,12 +115,16 @@ public class AccountService implements IAccountService {
                 authentication = manager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginAccountRequest.getEmail(), loginAccountRequest.getPassword()));
             } catch (AuthenticationException e) {
-                throw new CustomException("Email or password incorrect or account hasn't verify", HttpStatus.NOT_FOUND);
+                throw new CustomException("Sai email hoặc mật khẩu!", HttpStatus.NOT_FOUND);
             }
 
             AccountDetailsCustom detailsCustom = (AccountDetailsCustom) authentication.getPrincipal();
             if (detailsCustom.getStatus() == 2) {
-                throw new CustomException("Account has been blocked!", HttpStatus.UNAUTHORIZED);
+                throw new CustomException("Tài khoản bị khóa!", HttpStatus.UNAUTHORIZED);
+            }
+
+            if (detailsCustom.getStatus() == 0) {
+                throw new CustomException("Tài khoản chưa được xác thực!", HttpStatus.UNAUTHORIZED);
             }
 
             String accessToken = jwtProvider.generateAccessToken(detailsCustom);
@@ -132,7 +137,7 @@ public class AccountService implements IAccountService {
                     .accessToken(accessToken)
                     .build();
         } else {
-            throw new CustomException("Account not found!", HttpStatus.NOT_FOUND);
+            throw new CustomException("Không tìm thấy tài khoản!", HttpStatus.NOT_FOUND);
         }
 
     }
@@ -163,7 +168,7 @@ public class AccountService implements IAccountService {
                 .createdAt(new Date())
                 .avatar("https://png.pngtree.com/png-vector/20220608/ourmid/pngtree-man-avatar-isolated-on-white-background-png-image_4891418.png")
                 .build();
-        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"Verify account","Your otp is: "+otp));
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(), "Verify account", "Your otp is: " + otp));
 
         candidateRepository.save(candidate);
         accountRepository.save(account);
@@ -177,7 +182,7 @@ public class AccountService implements IAccountService {
         if (accountRepository.existsByEmail(registerAccount.getEmailCompany())) {
             throw new CustomException("Email existed!", HttpStatus.CONFLICT);
         }
-        if (companyRepository.existsByPhone(registerAccount.getPhone())){
+        if (companyRepository.existsByPhone(registerAccount.getPhone())) {
             throw new CustomException("Phone existed!", HttpStatus.CONFLICT);
         }
         if (!registerAccount.getPassword().equals(registerAccount.getConfirmPassword())) {
@@ -197,7 +202,7 @@ public class AccountService implements IAccountService {
         accountRepository.save(account);
 
         Company company = Company.builder()
-                .name(registerAccount.getName())  // Lấy tên từ yêu cầu đăng ký
+                .name(registerAccount.getName())
                 .createdAt(new Date())
                 .account(account)
                 .followers(0)
@@ -208,11 +213,11 @@ public class AccountService implements IAccountService {
 
         AddressCompany addressCompany = AddressCompany.builder()
                 .company(company)
-                .location(locationRepository.findById(registerAccount.getLocationId()).orElseThrow(()-> new CustomException("City not found", HttpStatus.NOT_FOUND)))
+                .location(locationRepository.findById(registerAccount.getLocationId()).orElseThrow(() -> new CustomException("City not found", HttpStatus.NOT_FOUND)))
                 .createdAt(new Date())
                 .status(1)
                 .build();
-        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"giangpc7@gmail.com","Your otp is: "+otp));
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(), "giangpc7@gmail.com", "Your otp is: " + otp));
         companyRepository.save(company);
         addressCompanyRepository.save(addressCompany);
 
@@ -381,11 +386,12 @@ public class AccountService implements IAccountService {
             accountRepository.save(currentUser);
         }
     }
+
     @Override
     public boolean accountVerify(String email, Integer otp) throws CustomException {
-        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND) );
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND));
         Company company = companyRepository.findByAccountId(account.getId()).orElse(null);
-        if (otp.equals( account.getOtp())){
+        if (otp.equals(account.getOtp())) {
             if (company != null) {
                 account.setStatus(3);
                 account.setOtp(null);
@@ -394,22 +400,61 @@ public class AccountService implements IAccountService {
                 account.setStatus(1);
                 account.setOtp(null);
             }
-        }else {
-            throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
+        } else {
+            throw new CustomException("Invalid OTP", HttpStatus.BAD_REQUEST);
         }
         return true;
     }
 
     @Override
     public boolean resendOtp(String email) throws CustomException {
-        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND) );
-        if (account.getStatus()==1){
-            throw new CustomException("Your account has been verify",HttpStatus.BAD_REQUEST);
+        Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND));
+        if (account.getStatus() == 1) {
+            throw new CustomException("Your account has been verify", HttpStatus.BAD_REQUEST);
         }
         Integer otp = otpGenerator();
-        emailService.sendSimpleMessage(new MailBody(account.getEmail(),"Verify account","Your otp is: "+otp));
+        emailService.sendSimpleMessage(new MailBody(account.getEmail(), "Verify account", "Your otp is: " + otp));
         account.setOtp(otp);
         accountRepository.save(account);
         return true;
     }
+
+    @Override
+    public ResponseEntity<Integer> changeStatusAcount(Integer companyId) {
+        Optional<Company> company = companyRepository.findById(companyId);
+        if (company.isPresent()) {
+            Company company1 = company.get();
+            Integer s = company1.getAccount().getId();
+            Optional<Account> accountOptional = accountRepository.findById(s);
+
+            if (accountOptional.isPresent()) {
+                Account account = accountOptional.get();
+
+                if (account.getStatus() == 3) {
+                    account.setStatus(1);  // Chuyển từ 3 về 1
+                    accountRepository.save(account);  // Lưu thay đổi
+                }
+
+                return ResponseEntity.ok(account.getStatus());
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return null;
+    }
+
+
+
+
+//    }
+//        Optional<Account> account = accountRepository.findById();
+//        if (account.isPresent()) {
+//           Account account1 =  account.get();
+//           if (account1.getStatus() == 3){
+//               account1.setStatus(1);
+//           }
+//
+//        }
+//        return null;
+//    }
 }
