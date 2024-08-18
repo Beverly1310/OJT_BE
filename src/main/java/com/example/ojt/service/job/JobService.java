@@ -4,8 +4,7 @@ package com.example.ojt.service.job;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.JobAddRequest;
 import com.example.ojt.model.dto.request.JobRequest;
-import com.example.ojt.model.dto.response.JobResponse;
-import com.example.ojt.model.dto.response.SuccessResponse;
+import com.example.ojt.model.dto.response.*;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
 import com.example.ojt.service.account.AccountService;
@@ -105,11 +104,11 @@ public class JobService implements IJobService{
     }
 
 
-   @Override
+    @Override
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
         Company company = getCurrentCompany();
-    Integer locationId =    addressCompanyRepository.findByCompanyId(getCurrentCompany().getId()).orElseThrow(()->new CustomException("Location not found", HttpStatus.NOT_FOUND)).getLocation().getId();
+        Integer locationId =    addressCompanyRepository.findByCompanyId(getCurrentCompany().getId()).orElseThrow(()->new CustomException("Location not found", HttpStatus.NOT_FOUND)).getLocation().getId();
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
 
@@ -167,7 +166,6 @@ public class JobService implements IJobService{
 
         return true;
     }
-
 
 
 
@@ -250,16 +248,88 @@ public class JobService implements IJobService{
     @Override
     public SuccessResponse findById(Integer findId) throws CustomException {
         try {
-            Job job = jobRepository.findById(findId).orElseThrow(() -> new CustomException("Job not found" , HttpStatus.NOT_FOUND));
+            // Fetch the Job entity
+            Job job = jobRepository.findById(findId)
+                    .orElseThrow(() -> new CustomException("Job not found", HttpStatus.NOT_FOUND));
+
+            // Fetch LevelsJobs associated with this job
+            Set<LevelsJobs> levelsJobs = levelsJobsRepository.findByJobId(findId);
+
+            // Map LevelsJobs to LevelsJobsDTO
+            Set<LevelsJobsDTO> levelsJobsDTOs = levelsJobs.stream()
+                    .map(levelsJob -> LevelsJobsDTO.builder()
+                            .id(levelsJob.getId())
+                            .levelJob(LevelJobDTO.builder()
+                                    .id(levelsJob.getLevelJob().getId())
+                                    .name(levelsJob.getLevelJob().getName())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toSet());
+
+            // Extract LevelJobDTOs
+            Set<LevelJobDTO> levelJobDTOs = levelsJobsDTOs.stream()
+                    .map(LevelsJobsDTO::getLevelJob)
+                    .collect(Collectors.toSet());
+
+            // Map CompanyDTO and AddressCompanyDTO
+            CompanyDTO companyDTO = CompanyDTO.builder()
+                    .id(job.getCompany().getId())
+                    .name(job.getCompany().getName())
+                    .logo(job.getCompany().getLogo())
+                    .website(job.getCompany().getWebsite())
+                    .linkFacebook(job.getCompany().getLinkFacebook())
+                    .linkLinkedin(job.getCompany().getLinkLinkedin())
+                    .followers(job.getCompany().getFollowers())
+                    .size(job.getCompany().getSize())
+                    .outstanding(job.getCompany().getOutstanding())
+                    .description(job.getCompany().getDescription())
+                    .phone(job.getCompany().getPhone())
+                    .emailCompany(job.getCompany().getEmailCompany())
+                    .policy(job.getCompany().getPolicy())
+                    .build();
+
+            AddressCompany addressCompany = job.getAddressCompany();
+            LocationDTO locationDTO = LocationDTO.builder()
+                    .id(addressCompany.getLocation().getId())
+                    .nameCity(addressCompany.getLocation().getNameCity())
+                    .build();
+
+            AddressCompanyDTO addressCompanyDTO = AddressCompanyDTO.builder()
+                    .id(addressCompany.getId())
+                    .address(addressCompany.getAddress())
+                    .mapUrl(addressCompany.getMapUrl())
+                    .createdAt(addressCompany.getCreatedAt())
+                    .status(addressCompany.getStatus())
+                    .location(locationDTO)
+                    .build();
+
+            // Create JobDetailDTO
+            JobDetailDTO jobDetailDTO = JobDetailDTO.builder()
+                    .id(job.getId())
+                    .title(job.getTitle())
+                    .description(job.getDescription())
+                    .requirements(job.getRequirements())
+                    .salary(job.getSalary())
+                    .expireAt(job.getExpireAt())
+                    .createdAt(job.getCreatedAt())
+                    .outstanding(job.getOutstanding())
+                    .status(job.getStatus())
+                    .levelJobs(levelJobDTOs) // Use the extracted Set<LevelJobDTO>
+                    .company(companyDTO)
+                    .addressCompany(addressCompanyDTO)
+                    .build();
+
             return SuccessResponse.builder()
                     .statusCode(HttpStatus.OK.value())
-                    .message("get job success")
-                    .data(job)
+                    .message("Get job success")
+                    .data(jobDetailDTO)
                     .build();
-        }catch (Exception e){
-            throw new CustomException("Error finding Job" , HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            throw new CustomException("Error finding Job", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
 
 

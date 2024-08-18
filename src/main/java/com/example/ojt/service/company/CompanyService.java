@@ -7,6 +7,14 @@ import com.example.ojt.model.dto.response.CandidateInfoRes;
 import com.example.ojt.model.dto.response.CompanyResponse;
 import com.example.ojt.model.entity.*;
 import com.example.ojt.repository.*;
+import com.example.ojt.model.entity.AddressCompany;
+import com.example.ojt.model.entity.Company;
+import com.example.ojt.model.entity.Location;
+import com.example.ojt.model.entity.TypeCompany;
+import com.example.ojt.repository.IAddressCompanyRepository;
+import com.example.ojt.repository.ICompanyRepository;
+import com.example.ojt.repository.ILocationRepository;
+import com.example.ojt.repository.ITypeCompanyRepository;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
 import com.example.ojt.service.account.AccountService;
@@ -30,6 +38,7 @@ public class CompanyService implements ICompanyService {
     private final ICompanyRepository companyRepository;
     private final UploadService uploadService;
     private final ITypeCompanyRepository typeCompanyRepository;
+    private final IAddressCompanyRepository addressCompanyRepository;
     private final ILocationRepository locationRepository;
     private final ICandidateRepository candidateRepository;
     private final ISkillCandidateRepository skillCandidateRepository;
@@ -185,8 +194,21 @@ public class CompanyService implements ICompanyService {
                     if (companyRequest.getLocationId() != null) {
                         Location location = locationRepository.findById(companyRequest.getLocationId())
                                 .orElseThrow(() -> new CustomException("Location not found with id " + companyRequest.getLocationId(), HttpStatus.NOT_FOUND));
-                        addressCompany.setLocation(location);
+
+                        Set<AddressCompany> companyAddressSet = company.getAddressCompanySet();
+                        if (!companyAddressSet.isEmpty()) {
+                            AddressCompany companyAddress = companyAddressSet.iterator().next(); // Renamed the variable to avoid conflict
+                            companyAddress.setLocation(location);
+
+                            if (companyRequest.getMapUrl() != null) {
+                                companyAddress.setMapUrl(companyRequest.getMapUrl());
+                            }
+
+                            addressCompanyRepository.save(companyAddress); // Save the updated AddressCompany
+                        }
                     }
+
+
 
                     addressCompany.setCreatedAt(new Date()); // Update timestamp
                 }

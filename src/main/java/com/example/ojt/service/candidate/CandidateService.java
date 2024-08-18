@@ -862,7 +862,31 @@ public class CandidateService implements ICandidateService {
         return jobs.get(0);
     }
 
+    public void applyForJob(Integer jobId, String cvUrl, String content) {
+        // Lấy thông tin ứng viên hiện tại
+        Candidate currentCandidate = getCurrentCandidate();
 
+
+        // Kiểm tra xem ứng viên có tồn tại không
+        if (currentCandidate == null) {
+            throw new RuntimeException("Candidate not found");
+        }
+
+        // Lấy thông tin công việc
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Tạo đối tượng ứng tuyển
+        JobCandidates jobCandidates = JobCandidates.builder()
+                .candidate(currentCandidate)
+                .job(job)
+                .cvUrl(cvUrl)
+                .content(content)
+                .status(0) // Hoặc giá trị phù hợp với trạng thái mặc định
+                .build();
+
+        // Lưu thông tin ứng tuyển vào cơ sở dữ liệu
+        jobCandidateRepository.save(jobCandidates);
+    }
 
 }
 //  private Integer id;
