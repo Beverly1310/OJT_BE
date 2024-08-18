@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api.myservice.com/v1/company/type-company")
+@RequestMapping("/api.myservice.com/v1/type-company")
 public class TypeCompanyController {
     @Autowired
     private ITypeCompanyService typeCompanyService;

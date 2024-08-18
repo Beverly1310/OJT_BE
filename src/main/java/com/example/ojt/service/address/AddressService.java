@@ -17,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AddressService implements IAddressService {
@@ -106,6 +108,21 @@ public class AddressService implements IAddressService {
         addressCompany.setStatus(2);
         addressCompanyRepository.save(addressCompany);
         return true;
+    }
+    @Override
+    public List<AddressCompanyResponse> findAllByCurrentCompany() throws CustomException {
+        Company company = getCurrentCompany();
+        List<AddressCompany> addressCompanies = addressCompanyRepository.findAllByCompany(company);
+
+        // Sử dụng Stream API để lọc các địa chỉ trùng lặp theo locationId
+        List<AddressCompanyResponse> uniqueLocations = addressCompanies.stream()
+                .collect(Collectors.groupingBy(addressCompany -> addressCompany.getLocation().getId()))
+                .values().stream()
+                .map(locationList -> locationList.get(0)) // Lấy địa chỉ đầu tiên của mỗi nhóm locationId
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+
+        return uniqueLocations;
     }
 
 

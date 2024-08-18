@@ -3,6 +3,7 @@ package com.example.ojt.controller;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
 import com.example.ojt.model.dto.response.CompanyResponse;
+import com.example.ojt.model.entity.Candidate;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
@@ -44,6 +45,15 @@ public class CompanyController {
         }
     }
 
+    @GetMapping("/detail")
+    public ResponseEntity<?> findCurrentCompany() {
+        try {
+            CompanyResponse companyResponse = companyService.findCurrentCompany();
+            return ResponseEntity.ok().body(companyResponse);
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
+        }
+    }
     @GetMapping
     public ResponseEntity<Page<CompanyResponse>> findAllCompanies(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
@@ -84,5 +94,17 @@ public class CompanyController {
     }
 
 
+
+
+    @GetMapping("viewCandidateInfo/{candidateId}")
+    public ResponseEntity<?> viewCandidateBasicInformation(@PathVariable Integer candidateId) throws CustomException{
+        return ResponseEntity.ok(candidateService.getBasicInfo(candidateId));
+    }
+
+
+    @GetMapping("/job/{jobId}/candidates")
+    public List<Candidate> getCandidatesByJob(@PathVariable Integer jobId) {
+        return candidateService.getCandidatesByJobId(jobId);
+    }
 
 }

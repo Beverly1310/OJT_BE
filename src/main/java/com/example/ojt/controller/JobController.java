@@ -42,7 +42,7 @@ public class JobController {
 
     @GetMapping
     public ResponseEntity<Page<JobResponse>> getJobs(
-            @PageableDefault(page = 0, size = 3, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "") String location,
             @RequestParam(defaultValue = "id") String sort,
@@ -90,7 +90,7 @@ public class JobController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping ("/{id}")
     public ResponseEntity<?> deleteJob(@PathVariable Integer id) throws CustomException {
         boolean check  = jobService.deleteJob(id);
         if (check) {

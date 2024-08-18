@@ -4,26 +4,27 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CandidateBasicInfoResponse {
+public class CVPage
+{
     String name;
     String about;
+    List<ExperienceCVResponse> experience;
     Integer age;
     String address;
+    List<SkillCVResponse> skills;
+    List<CertificateCVResponse> certificates;
+    List<ProjectCVResponse> projects;
+    List<EducationCVResponse> educations;
     String phone;
     Boolean gender;
-    List<ExperienceCVResponse> experience;
-    List<String> skills;
     String linkLinkedin;
     String linkGit;
-    String letter;
-    String position;
     String avatar;
 
 }
