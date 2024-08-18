@@ -120,6 +120,7 @@ public class CompanyService implements ICompanyService {
     }
 
 
+
     @Override
     public boolean update(EditCompanyRequest companyRequest) throws CustomException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -228,6 +229,10 @@ public class CompanyService implements ICompanyService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    @Override
+    public Long countCompanies() {
+        return companyRepository.count();
+    }
 
     // @Override
     //    public ResponseEntity<Page<UserResponsedto>> findAllUser(Pageable pageable) {

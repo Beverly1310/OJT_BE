@@ -1,7 +1,6 @@
 package com.example.ojt.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,9 +38,8 @@ public class Company {
     @JoinColumn(name = "typeCompany_id")
     private TypeCompany typeCompany;
 
-    @OneToOne
+    @OneToOne  // Fetching Account eagerly
     @JoinColumn(name = "account_id")
-    @JsonIgnore
     private Account account;
 
     @OneToMany(mappedBy = "company")

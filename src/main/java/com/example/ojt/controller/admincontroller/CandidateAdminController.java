@@ -1,5 +1,6 @@
 package com.example.ojt.controller.admincontroller;
 
+import com.example.ojt.model.dto.request.CandidatePerMonth;
 import com.example.ojt.model.dto.request.CandidateEmailDTO;
 import com.example.ojt.service.candidate.ICandidateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -41,6 +47,7 @@ public class CandidateAdminController {
 
     /**
      * thay đổi trang thái
+     *
      * @param candidateId
      * @return
      */
@@ -49,9 +56,65 @@ public class CandidateAdminController {
         return candidateService.changaStatus(candidateId);
     }
 
+
+    /**
+     * ứng viên nổi bật
+     *
+     * @param candidateId
+     * @return
+     */
     @PatchMapping("/candidates/{candidateId}")
     public ResponseEntity<Integer> changeOutstandingStatus(@PathVariable Integer candidateId) {
         return candidateService.changeOutstandingStatus(candidateId);
     }
+
+    /**
+     * Lấy ứng viên theo khoảng thời gian
+     *
+     * @param startDate
+     * @param endDate
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/candidates/date-range")
+    public ResponseEntity<Page<CandidatePerMonth>> findCandidatesByDateRange(
+            @RequestParam("startDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date startDate,
+            @RequestParam("endDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date endDate,
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+
+        // Retrieve candidates based on date range and pagination
+        Page<CandidatePerMonth> candidates = candidateService.findCandidatesByDateRange(startDate, endDate, pageable);
+        return ResponseEntity.ok(candidates);
+    }
+
+
+    /**
+     * lấy danh sách ứng viên theo tháng
+     *
+     * @param year
+     * @param pageable
+     * @return
+     */
+
+    @GetMapping("/candidates/by-month")
+    public ResponseEntity<List<CandidatePerMonth>> findCandidatesByMonth(
+            @RequestParam("year") int year,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+
+        List<CandidatePerMonth> candidatesByMonth = candidateService.findCandidatesByMonth(year, pageable);
+        return ResponseEntity.ok(candidatesByMonth);
+    }
+
+    /**
+     * lấy s lượng ứng viên
+     * @return
+     */
+
+    @GetMapping("/candidates/count")
+    public ResponseEntity<Long> countCandidates() {
+        long count = candidateService.countCandidates();
+        return ResponseEntity.ok(count);
+    }
 }
+
 

@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Date;
+import java.util.Map;
 
 public interface ICandidateService {
     boolean addEducation(EduCandidateAddReq eduCandidateAddReq) throws CustomException;
@@ -88,6 +90,15 @@ public interface ICandidateService {
     ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
 
     List<LevelJob> getLevelJobs();
+
+    ResponseEntity<?> findOutstandingCandidates();
+
+    Page<CandidatePerMonth> findCandidatesByDateRange(Date startDate, Date endDate, Pageable pageable);
+
+    List<CandidatePerMonth> findCandidatesByMonth(int year, Pageable pageable);
+
+    long countCandidates();
+
     void uploadCV(MultipartFile file) throws CustomException;
     List<CVResponse> findAllByCurrentCandidate();
     void toggleCVPriority(Integer id) throws CustomException;
@@ -102,4 +113,5 @@ public interface ICandidateService {
     void editLetter(String content);
     boolean followCompany( Integer companyId);
     boolean unfollowCompany( Integer companyId);
+
 }

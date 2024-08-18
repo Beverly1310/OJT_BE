@@ -280,6 +280,7 @@ public class CandidateController {
        return new ResponseEntity<>(new DataResponse<>(response, levelJobs), HttpStatus.OK);
    }
 
+
     //   Quản lý CV
 //    Lấy danh sách CV
     @GetMapping("/cv/getAll")
@@ -372,4 +373,5 @@ public class CandidateController {
                     .body(new APIResponse(0, "Error: " + e.getMessage()));
         }
     }
+
 }
