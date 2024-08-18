@@ -2,7 +2,10 @@ package com.example.ojt.controller;
 
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
+import com.example.ojt.model.dto.response.APIResponse;
+import com.example.ojt.model.dto.response.CandidateInfoRes;
 import com.example.ojt.model.dto.response.CompanyResponse;
+import com.example.ojt.model.dto.responsewapper.DataResponse;
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,5 +80,10 @@ public class CompanyController {
         }
     }
 
-
+    @GetMapping("/candidate/info/{id}")
+    public ResponseEntity<?> findCandidateById(@PathVariable Integer id) throws CustomException {
+        CandidateInfoRes candidateInfoRes = companyService.getCandidateInfoById(id);
+        APIResponse response = new APIResponse(200, "Get info candidate success");
+        return new ResponseEntity<>(new DataResponse<>(response, candidateInfoRes), HttpStatus.OK);
+    }
 }

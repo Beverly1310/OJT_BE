@@ -21,4 +21,5 @@ public interface IExperienceCandidateRepository extends JpaRepository<Experience
     Optional<ExperienceCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
 
     List<ExperienceCandidate> findAllByCandidate(Candidate candidate);
+    List<ExperienceCandidate> findAllByCandidateId(Integer candidateId);
 }

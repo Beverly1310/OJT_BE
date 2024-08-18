@@ -384,9 +384,16 @@ public class AccountService implements IAccountService {
     @Override
     public boolean accountVerify(String email, Integer otp) throws CustomException {
         Account account = accountRepository.findByEmail(email).orElseThrow(() -> new CustomException("Account not found", HttpStatus.NOT_FOUND) );
+        Company company = companyRepository.findByAccountId(account.getId()).orElse(null);
         if (otp.equals( account.getOtp())){
-            account.setStatus(1);
-            account.setOtp(null);
+            if (company != null) {
+                account.setStatus(3);
+                account.setOtp(null);
+                return true;
+            } else {
+                account.setStatus(1);
+                account.setOtp(null);
+            }
         }else {
             throw new CustomException("Invalid OTP" , HttpStatus.BAD_REQUEST);
         }

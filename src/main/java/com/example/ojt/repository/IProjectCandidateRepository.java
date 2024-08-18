@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IProjectCandidateRepository extends CrudRepository<ProjectCandidate, Integer> {
@@ -19,4 +20,5 @@ public interface IProjectCandidateRepository extends CrudRepository<ProjectCandi
     Optional<ProjectCandidate> findByCandidateAndNameContains(Candidate candidate, String name);
 
     Optional<ProjectCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
+    List<ProjectCandidate> findAllByCandidateId(Integer candidateId);
 }

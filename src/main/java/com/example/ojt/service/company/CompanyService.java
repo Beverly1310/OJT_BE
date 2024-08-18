@@ -3,14 +3,10 @@ package com.example.ojt.service.company;
 import com.example.ojt.exception.CustomException;
 import com.example.ojt.exception.IdFormatException;
 import com.example.ojt.model.dto.request.EditCompanyRequest;
+import com.example.ojt.model.dto.response.CandidateInfoRes;
 import com.example.ojt.model.dto.response.CompanyResponse;
-import com.example.ojt.model.entity.AddressCompany;
-import com.example.ojt.model.entity.Company;
-import com.example.ojt.model.entity.Location;
-import com.example.ojt.model.entity.TypeCompany;
-import com.example.ojt.repository.ICompanyRepository;
-import com.example.ojt.repository.ILocationRepository;
-import com.example.ojt.repository.ITypeCompanyRepository;
+import com.example.ojt.model.entity.*;
+import com.example.ojt.repository.*;
 import com.example.ojt.security.principle.AccountDetailsCustom;
 import com.example.ojt.service.UploadService;
 import jakarta.transaction.Transactional;
@@ -34,6 +30,12 @@ public class CompanyService implements ICompanyService {
     private final UploadService uploadService;
     private final ITypeCompanyRepository typeCompanyRepository;
     private final ILocationRepository locationRepository;
+    private final ICandidateRepository candidateRepository;
+    private final ISkillCandidateRepository skillCandidateRepository;
+    private final IExperienceCandidateRepository experienceCandidateRepository;
+    private final IEducationCandidateRepository educationCandidateRepository;
+    private final IProjectCandidateRepository projectCandidateRepository;
+    private final ICertificateRepository certificateRepository;
 
     @Override
     public Page<CompanyResponse> findAllCompanies(Pageable pageable, String locationName, String companyName) {
@@ -226,4 +228,28 @@ public class CompanyService implements ICompanyService {
     //        Page<UserResponsedto> response = user.map(this::    mapToUserResponse);
     //        return ResponseEntity.status(HttpStatus.OK).body(response);
     //    }
+
+    @Override
+    public CandidateInfoRes getCandidateInfoById(Integer candidateId) throws CustomException {
+        Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(()-> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
+        CandidateInfoRes candidateInfoRes = CandidateInfoRes.builder()
+                .id(candidateId)
+                .name(candidate.getName())
+                .birthday(candidate.getBirthday())
+                .address(candidate.getAddress())
+                .phone(candidate.getPhone())
+                .linkLinkedin(candidate.getLinkLinkedin())
+                .linkGit(candidate.getLinkGit())
+                .position(candidate.getPosition())
+                .avatar(candidate.getAvatar())
+                .aboutme(candidate.getAboutme())
+                .email(candidate.getAccount().getEmail())
+                .skills(skillCandidateRepository.findAllByCandidateId(candidateId).stream().map(SkillsCandidate::getName).toList())
+                .exp(experienceCandidateRepository.findAllByCandidateId(candidateId).stream().map(ExperienceCandidate::getCompany).toList())
+                .edu(educationCandidateRepository.findAllByCandidateId(candidateId).stream().map(EducationCandidate::getNameEducation).toList())
+                .project(projectCandidateRepository.findAllByCandidateId(candidateId).stream().map(ProjectCandidate::getName).toList())
+                .certi(certificateRepository.findAllByCandidateId(candidateId).stream().map(CertificateCandidate::getName).toList())
+                .build();
+        return candidateInfoRes;
+    }
 }

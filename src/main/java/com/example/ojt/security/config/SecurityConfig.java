@@ -2,6 +2,7 @@ package com.example.ojt.security.config;
 
 import com.example.ojt.security.jwt.JWTAuthTokenFilter;
 import com.example.ojt.security.principle.AccountDetailsServiceCustom;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Slf4j
 public class SecurityConfig {
     @Autowired
     private JWTAuthTokenFilter authTokenFilter;
@@ -76,7 +78,6 @@ public class SecurityConfig {
                                         .requestMatchers("/api.myservice.com/v1/admin/**").hasAuthority("ROLE_ADMIN")
                                         .requestMatchers("/api.myservice.com/v1/candidate/**").hasAuthority("ROLE_CANDIDATE")
                                         .requestMatchers("/api.myservice.com/v1/company/**").hasAuthority("ROLE_COMPANY")
-                                        .requestMatchers("/api.myservice.com/v1/user-manager/**", "/user-client/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER")
                                         .anyRequest().permitAll() // tất cả quyền
                 )
                 .authenticationProvider(authenticationProvider())
