@@ -30,5 +30,7 @@ public interface ICompanyService {
 
     List<CompanyResponse> findCompaniesByTypeCompany(Integer companyId);
 
+
+    Long countCompanies();
 }
 

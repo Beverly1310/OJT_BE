@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Date;
+import java.util.Map;
 
 public interface ICandidateService {
     boolean addEducation(EduCandidateAddReq eduCandidateAddReq) throws CustomException;
@@ -83,4 +85,12 @@ public interface ICandidateService {
     ResponseEntity<Integer> changeOutstandingStatus(Integer candidateId);
 
     List<LevelJob> getLevelJobs();
+
+    ResponseEntity<?> findOutstandingCandidates();
+
+    Page<CandidatePerMonth> findCandidatesByDateRange(Date startDate, Date endDate, Pageable pageable);
+
+    List<CandidatePerMonth> findCandidatesByMonth(int year, Pageable pageable);
+
+    long countCandidates();
 }

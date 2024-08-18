@@ -8,6 +8,7 @@ import com.example.ojt.service.candidate.ICandidateService;
 import com.example.ojt.service.company.ICompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import java.util.List;
 public class CompanyController {
     private final ICompanyService companyService;
     private final ICandidateService candidateService;
+
 
     @PutMapping("/update")
     public ResponseEntity<?> updateCompany(
@@ -75,6 +77,12 @@ public class CompanyController {
             return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
         }
     }
+
+    @GetMapping("outstanding")
+    public ResponseEntity<?> OutstandingCandidate() {
+        return candidateService.findOutstandingCandidates();
+    }
+
 
 
 }

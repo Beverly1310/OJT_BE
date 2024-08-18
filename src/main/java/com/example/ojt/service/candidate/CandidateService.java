@@ -18,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 
 @Service
@@ -35,7 +32,7 @@ public class CandidateService implements ICandidateService {
     private final IProjectCandidateRepository projectCandidateRepository;
     private final ISkillCandidateRepository skillCandidateRepository;
     private final ILevelJobRepository levelJobRepository;
-//    private final ISkillRepository skillRepository;
+    //    private final ISkillRepository skillRepository;
     private final IExperienceRepository experienceRepository;
     private final IProjectRepository projectRepository;
 
@@ -88,7 +85,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public EducationCandidate getEducationCandidate(Integer id) throws CustomException {
-        return educationCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Education not found", HttpStatus.NOT_FOUND));
+        return educationCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Education not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -179,7 +176,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public ExperienceCandidate getExperienceCandidate(Integer id) throws CustomException {
-        return experienceCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Experience not found", HttpStatus.NOT_FOUND));
+        return experienceCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Experience not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -234,7 +231,7 @@ public class CandidateService implements ICandidateService {
     @Override
     @Transactional
     public boolean addCertificate(AddCertificateReq addCertificateReq) throws CustomException {
-        if (certificateRepository.findByNameAndCandidate(addCertificateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (certificateRepository.findByNameAndCandidate(addCertificateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Certificate already exist", HttpStatus.BAD_REQUEST);
         }
         CertificateCandidate certificateCandidate = CertificateCandidate.builder()
@@ -269,7 +266,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public CertificateCandidate getCertificateCandidate(Integer id) throws CustomException {
-        return certificateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Certificate not found", HttpStatus.NOT_FOUND));
+        return certificateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Certificate not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -306,7 +303,7 @@ public class CandidateService implements ICandidateService {
         if (updateCertificateReq.getStartAt() != null) {
             certificateCandidate.setStartAt(updateCertificateReq.getStartAt());
         }
-        if (updateCertificateReq.getStartAt()!=null && updateCertificateReq.getEndAt()!=null){
+        if (updateCertificateReq.getStartAt() != null && updateCertificateReq.getEndAt() != null) {
             if (certificateCandidate.getEndAt().toInstant().isBefore(certificateCandidate.getStartAt().toInstant())) {
                 throw new CustomException("End date must be after start date", HttpStatus.BAD_REQUEST);
             }
@@ -317,10 +314,10 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public boolean addProject(AddProjectCandidateReq addProjectCandidateReq) throws CustomException {
-        if (projectCandidateRepository.findByNameAndCandidate(addProjectCandidateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (projectCandidateRepository.findByNameAndCandidate(addProjectCandidateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Project already exist", HttpStatus.BAD_REQUEST);
         }
-        if (addProjectCandidateReq.getEndAt()!=null && addProjectCandidateReq.getEndAt()!=null){
+        if (addProjectCandidateReq.getEndAt() != null && addProjectCandidateReq.getEndAt() != null) {
             if (addProjectCandidateReq.getEndAt().toInstant().isBefore(addProjectCandidateReq.getStartAt().toInstant())) {
                 throw new CustomException("End date must be after start date", HttpStatus.BAD_REQUEST);
             }
@@ -379,7 +376,7 @@ public class CandidateService implements ICandidateService {
         if (updateProjectReq.getStartAt() != null) {
             projectCandidate.setStartAt(updateProjectReq.getStartAt());
         }
-        if (updateProjectReq.getEndAt()!=null && updateProjectReq.getEndAt()!=null){
+        if (updateProjectReq.getEndAt() != null && updateProjectReq.getEndAt() != null) {
             if (projectCandidate.getEndAt().toInstant().isBefore(projectCandidate.getStartAt().toInstant())) {
                 throw new CustomException("End at must be after start at", HttpStatus.BAD_REQUEST);
             }
@@ -403,12 +400,12 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public ProjectCandidate getProject(Integer id) throws CustomException {
-        return projectCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Project not found", HttpStatus.NOT_FOUND));
+        return projectCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Project not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
     public boolean addSkill(AddSkillCandidateReq addSkillCandidateReq) throws CustomException {
-        if (skillCandidateRepository.findByNameAndCandidate(addSkillCandidateReq.getName(),getCurrentCandidate()).orElse(null) != null) {
+        if (skillCandidateRepository.findByNameAndCandidate(addSkillCandidateReq.getName(), getCurrentCandidate()).orElse(null) != null) {
             throw new CustomException("Skill already exist", HttpStatus.BAD_REQUEST);
         }
         SkillsCandidate skillsCandidate = SkillsCandidate.builder()
@@ -440,7 +437,7 @@ public class CandidateService implements ICandidateService {
 
     @Override
     public SkillsCandidate getSkill(Integer id) throws CustomException {
-        return skillCandidateRepository.findByIdAndCandidate(id,getCurrentCandidate()).orElseThrow(() -> new CustomException("Skill not found", HttpStatus.NOT_FOUND));
+        return skillCandidateRepository.findByIdAndCandidate(id, getCurrentCandidate()).orElseThrow(() -> new CustomException("Skill not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -469,6 +466,7 @@ public class CandidateService implements ICandidateService {
         skillCandidateRepository.delete(skillsCandidate);
         return true;
     }
+
     @Override
     public CVResponse getCandidateCV(Integer candidateId) throws CustomException {
         Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
@@ -514,10 +512,10 @@ public class CandidateService implements ICandidateService {
         }
         response.setProjects(projectCVResponses);
 //        Học vấn
-        List<EducationCandidate> educations=educationCandidateRepository.findAllByCandidateId(candidateId);
-        List<EducationCVResponse> educationCVResponses=new ArrayList<>();
-        for (EducationCandidate education:educations){
-            educationCVResponses.add(new EducationCVResponse(education.getNameEducation(),education.getMajor(),education.getStartAt(),education.getEndAt(),education.getInfo()));
+        List<EducationCandidate> educations = educationCandidateRepository.findAllByCandidateId(candidateId);
+        List<EducationCVResponse> educationCVResponses = new ArrayList<>();
+        for (EducationCandidate education : educations) {
+            educationCVResponses.add(new EducationCVResponse(education.getNameEducation(), education.getMajor(), education.getStartAt(), education.getEndAt(), education.getInfo()));
         }
         response.setEducations(educationCVResponses);
         return response;
@@ -528,7 +526,7 @@ public class CandidateService implements ICandidateService {
         Candidate candidate = candidateRepository.findById(candidateId).orElseThrow(() -> new CustomException("Candidate not found!", HttpStatus.NOT_FOUND));
         CandidateBasicInfoResponse response = new CandidateBasicInfoResponse();
 //        Thiết lập các thông tin cơ bản
-        response.setName(candidate.getName()    );
+        response.setName(candidate.getName());
         response.setAbout(candidate.getAboutme());
         response.setPhone(candidate.getPhone());
         LocalDate birthDate = candidate.getBirthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -555,7 +553,6 @@ public class CandidateService implements ICandidateService {
     }
 
 
-
     @Override
     public Page<CandidateEmailDTO> getAllCandidatesWithEmail(Pageable pageable, String search) {
         // Search for candidates by name or account email
@@ -577,19 +574,18 @@ public class CandidateService implements ICandidateService {
     }
 
 
-
     @Override
-        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
-            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
-            if (candidateOptional.isPresent()) {
-                Candidate candidate = candidateOptional.get();
-                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
-                candidateRepository.save(candidate);
-                return ResponseEntity.ok(candidate.getStatus());
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
+    public ResponseEntity<Integer> changaStatus(Integer candidateId) {
+        Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+        if (candidateOptional.isPresent()) {
+            Candidate candidate = candidateOptional.get();
+            candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
+            candidateRepository.save(candidate);
+            return ResponseEntity.ok(candidate.getStatus());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
 
 
     @Override
@@ -625,6 +621,52 @@ public class CandidateService implements ICandidateService {
         return levelJobRepository.findAll();
     }
 
+    @Override
+    public ResponseEntity<List<Candidate>> findOutstandingCandidates() {
+        List<Candidate> outstandingCandidates = candidateRepository.findOutstandingCandidates();
+        return ResponseEntity.status(HttpStatus.OK).body(outstandingCandidates);
+    }
+
+    @Override
+    public Page<CandidatePerMonth> findCandidatesByDateRange(Date startDate, Date endDate, Pageable pageable) {
+        // Fetch candidates within the date range from the repository
+        Page<Candidate> candidates = candidateRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+
+        // Map candidates to CandidateEmailDTO and return the paginated result
+        return null;
+    }
+
+    @Override
+    public List<CandidatePerMonth> findCandidatesByMonth(int year, Pageable pageable) {
+        List<CandidatePerMonth> candidatesByMonth = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            List<Candidate> candidates = candidateRepository.findCandidatesByMonth(year, month);
+            CandidatePerMonth candidatePerMonth = CandidatePerMonth.builder()
+                    .month("Tháng "+month)
+                    .number(candidates.size())
+                    .build();
+            candidatesByMonth.add(candidatePerMonth);
+        }
+
+        return candidatesByMonth;
+    }
+
+    @Override
+    public long countCandidates() {
+        return candidateRepository.count();
+    }
 }
+//  private Integer id;
+//    private String name;
+//    private String accountEmail;
+//    private Date birthday;
+//    private String address;
+//    private String phone;
+//    private Integer status;
+//    private Boolean gender;
+//    private String linkLinkedin;
+//    private String linkGit;
+//    private String position;
+//    private Integer outstanding;
 
 

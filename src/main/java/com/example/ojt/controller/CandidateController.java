@@ -281,4 +281,6 @@ public class CandidateController {
        APIResponse response = new APIResponse(200, "Get level job success");
        return new ResponseEntity<>(new DataResponse<>(response, levelJobs), HttpStatus.OK);
    }
+
+
 }
