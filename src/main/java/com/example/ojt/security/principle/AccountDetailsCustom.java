@@ -72,7 +72,7 @@ public class AccountDetailsCustom implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return status==1;
     }
     public String getRoleName() {
         return role.getRoleName().name();

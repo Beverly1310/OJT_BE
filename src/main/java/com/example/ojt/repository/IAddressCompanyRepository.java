@@ -19,4 +19,5 @@ public interface IAddressCompanyRepository extends JpaRepository<AddressCompany,
     Page<AddressCompany> findAllByAddressContains(String address, Pageable pageable);
     List<AddressCompany> findByLocation(Location location);
     Optional<AddressCompany> findByLocationIdAndCompanyId(Integer locationId, Integer companyId);
+    Optional<AddressCompany> findByCompanyId(Integer companyId);
 }

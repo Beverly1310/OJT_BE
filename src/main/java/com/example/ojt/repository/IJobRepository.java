@@ -54,7 +54,7 @@ Optional<Job> findByIdAndCompany(Integer id, Company company);
     @Query("select count(j) from Job j where j.status=1")
     Integer getCountJob();
 
-    @Query("select count(j) from Job j where j.createdAt between :startDate and :endDate")
+    @Query("select count(j) from Job j where j.createdAt between :startDate and :endDate and j.status=1")
     Integer getCountNewJob(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
 //    Page<Job> findAllByCompanyAndTitleContainingAndAddressCompany_Location_NameCityContaining(String title, String nameCity, Company company, Pageable pageable);

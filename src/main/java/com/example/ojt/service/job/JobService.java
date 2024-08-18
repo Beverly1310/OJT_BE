@@ -109,8 +109,8 @@ public class JobService implements IJobService{
     @Transactional
     public boolean addJob(JobAddRequest jobRequest) throws CustomException {
         Company company = getCurrentCompany();
-
-        Location location = locationRepository.findById(jobRequest.getLocationId())
+    Integer locationId =    addressCompanyRepository.findByCompanyId(getCurrentCompany().getId()).orElseThrow(()->new CustomException("Location not found", HttpStatus.NOT_FOUND)).getLocation().getId();
+        Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new CustomException("Location not found", HttpStatus.NOT_FOUND));
 
 
