@@ -10,6 +10,7 @@ import com.example.ojt.model.dto.request.PasswordRequestThroughEmail;
 import com.example.ojt.model.dto.request.RegisterAccount;
 import com.example.ojt.model.dto.request.RegisterAccountCompanyRequest;
 import com.example.ojt.model.dto.response.JWTResponse;
+import org.springframework.http.ResponseEntity;
 
 public interface IAccountService {
     JWTResponse login(LoginAccountRequest loginAccountRequest) throws CustomException;
@@ -35,4 +36,8 @@ public interface IAccountService {
     void requestPasswordChange(PasswordChangeRequest request) throws CustomException;
 
     boolean resendOtp(String email) throws CustomException;
+
+    ResponseEntity<Integer> changeStatusAcount(Integer companyId);
+
+
 }

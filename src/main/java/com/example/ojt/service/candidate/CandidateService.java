@@ -35,6 +35,9 @@ public class CandidateService implements ICandidateService {
     private final IProjectCandidateRepository projectCandidateRepository;
     private final ISkillCandidateRepository skillCandidateRepository;
     private final ILevelJobRepository levelJobRepository;
+
+    //    private final ISkillRepository skillRepository;
+
     private final IExperienceRepository experienceRepository;
     private final ICVRepository cvRepository;
     private final IProjectRepository projectRepository;
@@ -484,7 +487,6 @@ public class CandidateService implements ICandidateService {
         } else {
             return getDefaultCVByCandidate(candidateId);
         }
-
     }
 
     @Override
@@ -543,17 +545,17 @@ public class CandidateService implements ICandidateService {
 
 
     @Override
-        public ResponseEntity<Integer> changaStatus(Integer candidateId) {
-            Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
-            if (candidateOptional.isPresent()) {
-                Candidate candidate = candidateOptional.get();
-                candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
-                candidateRepository.save(candidate);
-                return ResponseEntity.ok(candidate.getStatus());
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
+    public ResponseEntity<Integer> changaStatus(Integer candidateId) {
+        Optional<Candidate> candidateOptional = candidateRepository.findById(candidateId);
+        if (candidateOptional.isPresent()) {
+            Candidate candidate = candidateOptional.get();
+            candidate.setStatus(candidate.getStatus() == 1 ? 0 : 1);
+            candidateRepository.save(candidate);
+            return ResponseEntity.ok(candidate.getStatus());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
 
 
 
@@ -600,6 +602,41 @@ public class CandidateService implements ICandidateService {
     }
 
     @Override
+
+    public ResponseEntity<List<Candidate>> findOutstandingCandidates() {
+        List<Candidate> outstandingCandidates = candidateRepository.findOutstandingCandidates();
+        return ResponseEntity.status(HttpStatus.OK).body(outstandingCandidates);
+    }
+
+    @Override
+    public Page<CandidatePerMonth> findCandidatesByDateRange(Date startDate, Date endDate, Pageable pageable) {
+        // Fetch candidates within the date range from the repository
+        Page<Candidate> candidates = candidateRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+
+        // Map candidates to CandidateEmailDTO and return the paginated result
+        return null;
+    }
+
+    @Override
+    public List<CandidatePerMonth> findCandidatesByMonth(int year, Pageable pageable) {
+        List<CandidatePerMonth> candidatesByMonth = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            List<Candidate> candidates = candidateRepository.findCandidatesByMonth(year, month);
+            CandidatePerMonth candidatePerMonth = CandidatePerMonth.builder()
+                    .month("Tháng "+month)
+                    .number(candidates.size())
+                    .build();
+            candidatesByMonth.add(candidatePerMonth);
+        }
+
+        return candidatesByMonth;
+    }
+
+    @Override
+    public long countCandidates() {
+        return candidateRepository.count();
+    }
+
     public void uploadCV(MultipartFile file) throws CustomException {
         // Validate dạng file
         String contentType = file.getContentType();
@@ -829,6 +866,7 @@ public class CandidateService implements ICandidateService {
         // Lấy thông tin ứng viên hiện tại
         Candidate currentCandidate = getCurrentCandidate();
 
+
         // Kiểm tra xem ứng viên có tồn tại không
         if (currentCandidate == null) {
             throw new RuntimeException("Candidate not found");
@@ -849,6 +887,19 @@ public class CandidateService implements ICandidateService {
         // Lưu thông tin ứng tuyển vào cơ sở dữ liệu
         jobCandidateRepository.save(jobCandidates);
     }
+
 }
+//  private Integer id;
+//    private String name;
+//    private String accountEmail;
+//    private Date birthday;
+//    private String address;
+//    private String phone;
+//    private Integer status;
+//    private Boolean gender;
+//    private String linkLinkedin;
+//    private String linkGit;
+//    private String position;
+//    private Integer outstanding;
 
 
