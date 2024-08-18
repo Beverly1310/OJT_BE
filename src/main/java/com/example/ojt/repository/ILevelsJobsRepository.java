@@ -11,5 +11,5 @@ import java.util.Set;
 public interface ILevelsJobsRepository extends JpaRepository<LevelsJobs,Integer> {
 
     void deleteAllByJobId(Integer jobId);
-
+    Set<LevelsJobs> findByJobId(Integer jobId);
 }
