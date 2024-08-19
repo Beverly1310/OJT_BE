@@ -15,6 +15,8 @@ import java.util.List;
 
 import java.util.List;
 import java.util.Date;
+import java.util.Optional;
+
 @Repository
 public interface ICandidateRepository extends JpaRepository<Candidate, Integer> {
 
@@ -39,4 +41,5 @@ public interface ICandidateRepository extends JpaRepository<Candidate, Integer> 
    List<Candidate> findCandidatesByMonth(@Param("year") int year, @Param("month") int month);
 
 
+    Optional<Candidate> findByAccountId(Integer accountId);
 }

@@ -227,7 +227,7 @@ public class AccountService implements IAccountService {
 
     @Override
     public boolean updateCandidate(UpdateAccountCandidate updateAccountCandidate) throws CustomException {
-        Candidate candidate = candidateRepository.findById(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
+        Candidate candidate = candidateRepository.findByAccountId(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
         if (updateAccountCandidate.getAboutMe() != null && !updateAccountCandidate.getAboutMe().isBlank()) {
             candidate.setAboutme(updateAccountCandidate.getAboutMe());
         }

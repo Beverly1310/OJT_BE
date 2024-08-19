@@ -670,6 +670,7 @@ public class CandidateService implements ICandidateService {
     }
 
     @Override
+    @Transactional
     public void toggleCVPriority(Integer id) throws CustomException {
         List<CV> userCVs = cvRepository.findAllByCandidate(getCurrentCandidate());
         for (CV userCV : userCVs) {

@@ -7,6 +7,7 @@ import com.example.ojt.service.localtion.ILocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ public class LocationController {
 
     @GetMapping
     public ResponseEntity<Page<Location>> findAll(
+            @PageableDefault(size = 1000)
             Pageable pageable,
             @RequestParam(defaultValue = "") String search
     ) {
