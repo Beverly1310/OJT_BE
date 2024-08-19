@@ -25,4 +25,5 @@ public interface IEducationCandidateRepository extends JpaRepository<EducationCa
 
     List<EducationCandidate> findAllByCandidate(Candidate candidate);
 
+
 }

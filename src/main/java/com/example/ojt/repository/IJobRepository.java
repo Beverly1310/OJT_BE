@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -47,6 +48,15 @@ Optional<Job> findByIdAndCompany(Integer id, Company company);
             @Param("title") String title,
             @Param("location") String location,
             Pageable pageable);
+
+    @Query("select j from Job j where j.outstanding=:outstanding and j.status=1")
+    List<Job> getJobByOutstanding(Integer outstanding);
+    @Query("select count(j) from Job j where j.status=1")
+    Integer getCountJob();
+
+    @Query("select count(j) from Job j where j.createdAt between :startDate and :endDate and j.status=1")
+    Integer getCountNewJob(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
 //    Page<Job> findAllByCompanyAndTitleContainingAndAddressCompany_Location_NameCityContaining(String title, String nameCity, Company company, Pageable pageable);
 List<Job> findByCompany(Company company);
 }

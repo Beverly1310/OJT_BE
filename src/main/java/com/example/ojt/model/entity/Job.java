@@ -33,6 +33,7 @@ public class Job {
     private int status;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "company_id")
     private Company company;
 

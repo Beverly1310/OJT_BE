@@ -39,6 +39,7 @@ import java.util.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Random;
 
 import java.util.Objects;
 
@@ -58,6 +59,7 @@ public class AccountService implements IAccountService {
     private ILocationRepository locationRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private ICompanyRepository companyRepository;
     @Autowired
@@ -225,7 +227,7 @@ public class AccountService implements IAccountService {
 
     @Override
     public boolean updateCandidate(UpdateAccountCandidate updateAccountCandidate) throws CustomException {
-        Candidate candidate = candidateRepository.findById(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
+        Candidate candidate = candidateRepository.findByAccountId(getCurrentUser().getId()).orElseThrow(() -> new CustomException("Candidate not found", HttpStatus.NOT_FOUND));
         if (updateAccountCandidate.getAboutMe() != null && !updateAccountCandidate.getAboutMe().isBlank()) {
             candidate.setAboutme(updateAccountCandidate.getAboutMe());
         }

@@ -18,5 +18,4 @@ public interface ISkillCandidateRepository extends JpaRepository<SkillsCandidate
     Page<SkillsCandidate> findByCandidate(Candidate candidate, Pageable pageable);
     Optional<SkillsCandidate> findByIdAndCandidate(Integer id, Candidate candidate);
     List<SkillsCandidate> findAllByCandidateId(Integer candidateId);
-
 }

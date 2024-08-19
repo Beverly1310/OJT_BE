@@ -1,5 +1,7 @@
 package com.example.ojt.repository;
+
 import java.util.Optional;
+
 import com.example.ojt.model.entity.Company;
 import com.example.ojt.model.entity.TypeCompany;
 import org.springframework.data.domain.Page;
@@ -14,7 +16,7 @@ import java.util.Optional;
 
 
 @Repository
-public interface ICompanyRepository extends JpaRepository<Company,Integer> {
+public interface ICompanyRepository extends JpaRepository<Company, Integer> {
 
     boolean existsByPhone(String phone);
 
@@ -30,6 +32,10 @@ public interface ICompanyRepository extends JpaRepository<Company,Integer> {
     Page<Company> findAllByCompanyNameAndLocation(@Param("companyName") String companyName,
                                                   @Param("locationName") String locationName,
                                                   Pageable pageable);
+
     List<Company> findByTypeCompany(TypeCompany typeCompany);
+
+    @Query("select cp from Company cp where  cp.Outstanding=:outstanding and cp.account.status=1")
+    List<Company> getCompanyByOutstanding(Integer outstanding);
 }
 
