@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -18,7 +19,9 @@ public class EduCandidateAddReq {
     private String nameEducation;
     @NotBlank(message = "Please fill major")
     private String major;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startAt;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endAt;
     @NotBlank(message = "Please fill information of education")
     private String info;

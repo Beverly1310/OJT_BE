@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Date;
-import java.util.Map;
 
 public interface ICandidateService {
     boolean addEducation(EduCandidateAddReq eduCandidateAddReq) throws CustomException;
@@ -114,4 +113,5 @@ public interface ICandidateService {
     boolean followCompany( Integer companyId);
     boolean unfollowCompany( Integer companyId);
 
+    static void doSomeThing() {}
 }

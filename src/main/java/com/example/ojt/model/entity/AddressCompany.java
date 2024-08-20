@@ -19,6 +19,7 @@ public class AddressCompany {
     private Integer id;
 
     private String address;
+    @Column(columnDefinition = "LONGTEXT")
     private String mapUrl;
     @Column(name = "created_at")
     private Date createdAt;

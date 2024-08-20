@@ -18,7 +18,7 @@ public class Candidate {
     private String name;
     private int status;
     @Column(name = "birthday")
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private Date birthday;
     private String address;
     @Column(name = "phone", columnDefinition = "VARCHAR(20)")

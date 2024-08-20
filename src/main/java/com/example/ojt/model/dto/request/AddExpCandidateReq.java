@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -20,7 +21,9 @@ public class AddExpCandidateReq {
     @NotBlank(message = "Company must not be blank")
     @NotNull(message = "Company must not be null")
     private String company;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startAt;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endAt;
     @NotBlank(message = "Information must not be blank")
     @NotNull(message = "Information must not be null")

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -19,7 +20,7 @@ public class EditCompanyRequest {
     private String name;
 
     private MultipartFile logo;
-
+    @URL(regexp = "^(http|ftp).*")
     private String website;
 
     private String linkFacebook;
