@@ -106,7 +106,6 @@ public class AccountService implements IAccountService {
             //  Đặt lại mật khẩu nếu dùng mật khẩu dự phòng
             if (account.getBackupPassword() != null && passwordEncoder.matches(loginAccountRequest.getPassword(), account.getBackupPassword())) {
                 account.setPassword(passwordEncoder.encode(loginAccountRequest.getPassword()));
-                account.setBackupPassword(null);
                 accountRepository.save(account);
             }
 

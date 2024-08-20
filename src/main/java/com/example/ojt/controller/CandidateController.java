@@ -373,5 +373,4 @@ public class CandidateController {
                     .body(new APIResponse(0, "Error: " + e.getMessage()));
         }
     }
-
 }

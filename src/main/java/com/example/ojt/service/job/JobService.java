@@ -250,7 +250,7 @@ public class JobService implements IJobService{
         try {
             // Fetch the Job entity
             Job job = jobRepository.findById(findId)
-                    .orElseThrow(() -> new CustomException("Job not found", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new CustomException("Job with ID " + findId + " not found", HttpStatus.NOT_FOUND));
 
             // Fetch LevelsJobs associated with this job
             Set<LevelsJobs> levelsJobs = levelsJobsRepository.findByJobId(findId);
@@ -281,7 +281,7 @@ public class JobService implements IJobService{
                     .linkLinkedin(job.getCompany().getLinkLinkedin())
                     .followers(job.getCompany().getFollowers())
                     .size(job.getCompany().getSize())
-                    .outstanding(job.getCompany().getOutstanding())
+                    .outstanding(Optional.ofNullable(job.getCompany().getOutstanding()).orElse(0)) // Handle null value
                     .description(job.getCompany().getDescription())
                     .phone(job.getCompany().getPhone())
                     .emailCompany(job.getCompany().getEmailCompany())
@@ -312,7 +312,7 @@ public class JobService implements IJobService{
                     .salary(job.getSalary())
                     .expireAt(job.getExpireAt())
                     .createdAt(job.getCreatedAt())
-                    .outstanding(job.getOutstanding())
+                    .outstanding(Optional.ofNullable(job.getOutstanding()).orElse(0)) // Handle null value
                     .status(job.getStatus())
                     .levelJobs(levelJobDTOs) // Use the extracted Set<LevelJobDTO>
                     .company(companyDTO)
@@ -324,11 +324,12 @@ public class JobService implements IJobService{
                     .message("Get job success")
                     .data(jobDetailDTO)
                     .build();
+        } catch (CustomException e) {
+            throw e; // Rethrow to be caught by controller
         } catch (Exception e) {
-            throw new CustomException("Error finding Job", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new CustomException("Unexpected error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
 
